@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en" translate="no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="google" content="notranslate" />
+    <title>Tamir Zemach Portfolio</title>
+    <!-- site icon "C3" (icon-lab 2026-11-18): glossy extruded gold TZ, tilted -->
+    <link rel="icon" href="./favicon.ico?v=c3" sizes="48x48" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=c3" />
+    <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16.png?v=c3" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=c3" />    <!-- loading screen art first, ahead of the game's own files -->
+    <link rel="preload" href="./loading/sleeping.png" as="image" />
+    <link rel="preload" href="./fonts/lilitaone-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <style>
+      :root { color-scheme: dark; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 100%; height: 100%; overflow: hidden; background: #0c0d12; }
+      /* game UI text can't be drag-selected; the Tabs panel (#panel) keeps normal selection */
+      body { -webkit-user-select: none; user-select: none; }
+      /* no double-tap zoom on phones (iOS ignores user-scalable=no) */
+      html, body { touch-action: manipulation; }
+      /* touch screens: nothing selectable, no long-press callout — iOS showed its magnifier loupe
+         over the finger on a held drag (selectable panel text). Desktop keeps the panel's selection. */
+      @media (pointer: coarse) {
+        *, #panel, #panel * { -webkit-user-select: none !important; user-select: none !important; -webkit-touch-callout: none; }
+        input, textarea { -webkit-user-select: text !important; user-select: text !important; }
+      }
+      #panel { -webkit-user-select: auto; user-select: auto; }
+      input, textarea { -webkit-user-select: text; user-select: text; }
+      #app { position: fixed; inset: 0; }
+      canvas { display: block; }
+
+      /* Vignette — pure CSS radial gradient, no post-process pass needed (see discussion:
+         a screen-space-only darkening doesn't need scene depth/lighting, so a composited
+         DOM layer is strictly cheaper than routing the render through an EffectComposer).
+         Placed right after #app, before everything else, so normal DOM stacking order
+         alone keeps it under all HUD/panel UI — no z-index needed.
+         Hidden during Gameplay (walking around); shown for Zoom + Tabs — toggled via the
+         .show class from main.ts's enterFocus()/exitFocus(). */
+      #vignette {
+        position: fixed; inset: 0; pointer-events: none;
+        background: radial-gradient(ellipse at center, rgba(0,0,0,0) 45%, rgba(6,7,12,0.65) 100%);
+        opacity: 0; transition: opacity 0.4s ease;
+      }
+      #vignette.show { opacity: 1; }
+
+      /* --- UI overlay (HTML on top of the canvas) --- */
+      .overlay { position: fixed; inset: 0; pointer-events: none; font-family: system-ui, sans-serif; }
+      .overlay > * { pointer-events: auto; }
+
+      /* Persistent skip button */
+      #skip {
+        position: fixed; top: 14px; right: 14px;
+        padding: 8px 14px; border-radius: 8px;
+        background: rgba(20, 22, 30, 0.7); color: #c8cee0;
+        border: 1px solid rgba(255,255,255,0.14);
+        font-size: 13px; cursor: var(--cur-press); text-decoration: none;
+        transition: background 0.15s ease, color 0.15s ease;
+      }
+      #skip:hover { background: rgba(40, 44, 60, 0.9); color: #fff; }
+
+      /* ------------------------------------------------------------------ */
+      /* Station panel                                                        */
+      /* ------------------------------------------------------------------ */
+
+      #panel {
+        position: fixed; inset: 0; z-index: 100;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(6, 7, 11, 0.88);
+        opacity: 0; pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+      #panel.show { opacity: 1; pointer-events: auto; }
+      /* #p-card chrome (frame art, fonts, deck, footer, etc.) lives in src/styles/panel.css */
+
+      /* Loading screen: sleeping mascot + Z's. Covers the load + the shader warm-up freeze
+         (core/WarmUp.ts). Only transform/opacity animate, so the browser runs them on the
+         compositor thread and they keep moving while the main thread is frozen. */
+      @font-face {
+        font-family: 'Lilita One'; font-style: normal; font-weight: 400; font-display: swap;
+        src: url(fonts/lilitaone-latin.woff2) format('woff2');
+      }
+      /* sizes below: 1x at 1280x720, grow with the screen like the PC greeting bubble (min(w/1280,
+         h/720), never smaller, max 3x); pure CSS because this paints before the game's JS runs.
+         Phones come out the same as before (the clamp's floor, then the 72vw cap). */
+      #loading {
+        position: fixed; inset: 0; z-index: 1000;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(28px, min(2.188vw, 3.889vh), 84px);
+        background: #1b1430; transition: opacity 0.5s ease;
+      }
+      #loading.done { opacity: 0; pointer-events: none; }
+      #loading .sleeper { position: relative; width: min(clamp(320px, min(25vw, 44.44vh), 960px), 72vw); }
+      #loading .sleeper img { display: block; width: 100%; height: auto; }
+      /* landscape phones: the art smaller — at 320 px it filled the short screen (his call 2026-11-17) */
+      /* iPad portrait (paints before the JS, so a media query, not html.tab-port): the art + LOADING
+         at the greeting's size (~1.54x their 320 px; his call 2026-11-17) */
+      @media (orientation: portrait) and (min-width: 600px) and (max-width: 1100px) {
+        #loading .sleeper { width: 60vw; }
+        html #loading .label { font-size: 4.5vw; }
+        html #loading .z { font-size: 5.2vw; }
+      }
+      @media (max-height: 500px) and (orientation: landscape) { #loading .sleeper { width: clamp(180px, 58dvh, 260px); } #loading .z { --z-rise: 40px; } } /* Z's: a shorter rise, they ran off the top */
+      /* Z's rise from just above his head (top-right of the art), drifting up-right, growing, fading */
+      #loading .z {
+        position: absolute; left: 79%; top: 4%; opacity: 0;
+        font: 400 clamp(28px, min(2.188vw, 3.889vh), 84px) 'Lilita One', system-ui, sans-serif; color: #fff;
+        -webkit-text-stroke: clamp(5px, min(0.3906vw, 0.6944vh), 15px) #452259; paint-order: stroke fill;
+        animation: load-z 2.4s ease-out infinite;
+      }
+      #loading .z:nth-child(3) { animation-delay: 0.8s; }
+      #loading .z:nth-child(4) { animation-delay: 1.6s; }
+      /* LOADING: same letter pop as the tutorial bubble text (tutorial.css tut-ch-pop), looped —
+         letters pop in one by one, hold, fade out one by one, repeat */
+      #loading .label {
+        font: 400 clamp(24px, min(1.875vw, 3.333vh), 72px) 'Lilita One', system-ui, sans-serif; letter-spacing: clamp(2px, min(0.1562vw, 0.2778vh), 6px); color: #fff;
+        -webkit-text-stroke: clamp(5px, min(0.3906vw, 0.6944vh), 15px) #452259; paint-order: stroke fill;
+      }
+      #loading .label span {
+        display: inline-block; opacity: 0; transform-origin: 50% 80%;
+        animation: load-ch 2.4s infinite; animation-delay: calc(var(--i) * 0.07s);
+      }
+      @keyframes load-ch {
+        0%   { opacity: 0; transform: translateY(6px) scale(0.2) rotate(-12deg);
+               animation-timing-function: cubic-bezier(.2, 1.6, .45, 1); }
+        4.3% { opacity: 1; }
+        11%  { opacity: 1; transform: none; }
+        80%  { opacity: 1; transform: none; animation-timing-function: ease-in; }
+        92%  { opacity: 0; transform: scale(0.6); }
+        100% { opacity: 0; transform: scale(0.6); }
+      }
+      @keyframes load-z {
+        0%   { opacity: 0; transform: translate(0, 0) scale(0.4) rotate(-12deg); }
+        15%  { opacity: 1; }
+        70%  { opacity: 1; }
+        100% { opacity: 0; transform: translate(clamp(46px, min(3.594vw, 6.389vh), 138px), calc(-1 * var(--z-rise, clamp(110px, min(8.594vw, 15.28vh), 330px)))) scale(1.25) rotate(12deg); }
+      }
+    </style>
+    <script type="module" crossorigin src="./assets/index-BdfGAsDy.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-Blm57Fa7.css">
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="vignette"></div>
+    <div class="overlay">
+      <a id="skip" href="#" title="Same portfolio, no game" aria-label="Open the classic website"></a>
+    </div>
+    <div id="loading">
+      <div class="sleeper">
+        <img src="./loading/sleeping.png" alt="" width="640" height="586" />
+        <span class="z">Z</span><span class="z">Z</span><span class="z">Z</span>
+      </div>
+      <div class="label"><span style="--i:0">L</span><span style="--i:1">O</span><span style="--i:2">A</span><span style="--i:3">D</span><span style="--i:4">I</span><span style="--i:5">N</span><span style="--i:6">G</span></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,17 @@
+[
+  {
+    "label": "Unity",
+    "url": "https://play.unity.com/en/games/47405b51-2ae5-498d-b634-7c6d2762afe3/smoke-king",
+    "icon": "unity"
+  },
+  {
+    "label": "YouTube",
+    "url": "https://youtu.be/an81VlGoTEs",
+    "icon": "youtube"
+  },
+  {
+    "label": "GitHub",
+    "url": "https://github.com/Tamir-Zemach/Smoke_King",
+    "icon": "github"
+  }
+]

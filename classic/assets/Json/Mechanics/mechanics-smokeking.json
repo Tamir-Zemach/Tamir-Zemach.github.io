@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Object Pooling",
+    "video": "/media/smoke-king/object-pooling.mp4",
+    "text": "<strong>One generic pool</strong> for every cannon and particle. Objects are <strong>reused, never re-created</strong>.",
+    "snippets": [
+      {
+        "title": "ObjectPool.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/Smoke_King/main/Assets/Scripts/ObjectPooling/ObjectPool.cs"
+      },
+      {
+        "title": "BossParticlesPool.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/Smoke_King/main/Assets/Scripts/ObjectPooling/BossParticlesPool.cs"
+      }
+    ]
+  },
+  {
+    "title": "VFX",
+    "video": "/media/smoke-king/vfx.mp4",
+    "text": "Telegraphs, impact bursts and smoke: all driven by <strong>DOTween</strong>.",
+    "snippets": [
+      {
+        "title": "SmokeParticleManager.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/Smoke_King/main/Assets/Scripts/Particles/SmokeParticleManager.cs"
+      },
+      {
+        "title": "ParticleMovementUtility.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/Smoke_King/main/Assets/Scripts/Particles/ParticleMovementUtility.cs"
+      }
+    ]
+  },
+  {
+    "title": "Palette Swap Shader",
+    "video": "/media/smoke-king/polarity-switch.mp4",
+    "text": "<strong>One shader, one texture, two palettes.</strong> A hand-painted mask decides exactly what changes.",
+    "snippets": [
+      {
+        "title": "PlayerHealthManager.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/Smoke_King/main/Assets/Scripts/Player/PlayerHealthManager.cs"
+      },
+      {
+        "title": "PlayerStateManager.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/Smoke_King/main/Assets/Scripts/Player/PlayerStateManager.cs"
+      }
+    ]
+  },
+  {
+    "title": "Parallax Effect",
+    "video": "/media/smoke-king/parallax-effect.mp4",
+    "text": "<strong>One static image</strong>, split into <strong>layers</strong> that each move on their own.",
+    "snippets": [
+      {
+        "title": "ParallaxManager.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/Smoke_King/main/Assets/Background/ParallaxManager.cs"
+      }
+    ]
+  }
+]

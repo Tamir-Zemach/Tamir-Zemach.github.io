@@ -1,0 +1,46 @@
+[
+  {
+    "title": "Dash Drill",
+    "video": "/media/screwman/dash-drill.mp4",
+    "text": "A <strong>high-speed dive</strong> through the ground that <strong>ignores obstacles</strong>, then erupts back out.",
+    "snippets": [
+      {
+        "title": "DashFunctions.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/ScrewMan/main/Assets/Scripts/Player/DashFunctions.cs"
+      }
+    ]
+  },
+  {
+    "title": "Camera Transition",
+    "video": "/media/screwman/camera-transition.mp4",
+    "text": "The camera <strong>reframes</strong> for special zones, <strong>follows your direction</strong> and <strong>shakes on impact</strong>.",
+    "snippets": [
+      {
+        "title": "CameraController.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/ScrewMan/refs/heads/main/Assets/Scripts/Triggers/CameraController.cs"
+      }
+    ]
+  },
+  {
+    "title": "Ragdoll",
+    "video": "/media/screwman/ragdoll.mp4",
+    "text": "Replaces defeated enemies with a <strong>physics-driven ragdoll</strong>.",
+    "snippets": [
+      {
+        "title": "Ragdoll.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/ScrewMan/refs/heads/main/Assets/Scripts/Enemies/Ragdoll.cs"
+      }
+    ]
+  },
+  {
+    "title": "Static Turret",
+    "video": "/media/screwman/static-turret.mp4",
+    "text": "<strong>Hand-animated, frame by frame.</strong> Winds up, fires, then drains away on death.",
+    "snippets": [
+      {
+        "title": "StaticTurret.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/ScrewMan/refs/heads/main/Assets/Scripts/Enemies/StaticTurret.cs"
+      }
+    ]
+  }
+]

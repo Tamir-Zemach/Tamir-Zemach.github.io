@@ -1,0 +1,1083 @@
+/* =====================================================================
+   game-skin.css — re-skins the classic site with the portfolio GAME's UI art.
+   Loaded LAST; delete its <link> in index.html to get the old look back.
+   Art + fonts are the game's own files (absolute /ui/... and /fonts/... paths,
+   served by the game once this site lives at /classic/).
+   ===================================================================== */
+
+@font-face { font-family: 'Cinzel'; font-weight: 700 900; font-display: swap; src: url(/fonts/cinzel-latin.woff2) format('woff2'); }
+@font-face { font-family: 'Fauna One'; font-weight: 400; font-display: swap; src: url(/fonts/faunaone-latin.woff2) format('woff2'); }
+@font-face { font-family: 'Lilita One'; font-weight: 400; font-display: swap; src: url(/fonts/lilitaone-latin.woff2) format('woff2'); }
+
+:root {
+    /* same tokens as the game's panel.css */
+    --p-bg: #0e0a1a;
+    --p-ink: #f3eeff;
+    --p-ink-dim: #c6bce0;
+    --p-ink-faint: #8b7fac;
+    --p-gold: #f0c15a;
+    --p-gold-soft: #d9a94a;
+    --p-gold-line: rgba(240, 193, 90, 0.42);
+    --p-violet: #a880ff;
+    --cur-hand: image-set(url(/ui/cursor_hand.png) 1x, url(/ui/cursor_hand@2x.png) 2x) 2 2, auto;
+    --cur-press: image-set(url(/ui/cursor_hand_press.png) 1x, url(/ui/cursor_hand_press@2x.png) 2x) 2 2, pointer;
+}
+
+/* ---------- page + the game's hand cursor and click feedback (game hud.css) ---------- */
+html { cursor: var(--cur-hand); }
+body * { cursor: inherit; }
+a, button, .card, .snippet-toggle, .modal-close { cursor: var(--cur-press) !important; }
+:root { --cur-tap: image-set(url(/ui/cursor_hand_tap.png) 1x, url(/ui/cursor_hand_tap@2x.png) 2x) 2 2, pointer; }
+body.cur-tap, body.cur-tap * { cursor: var(--cur-tap) !important; }
+
+.click-fx { position: fixed; inset: 0; z-index: 100000; pointer-events: none; overflow: hidden; }
+.click-fx > div { position: absolute; pointer-events: none; }
+.click-fx-ring { border-radius: 50%; border: 3px solid var(--c); box-shadow: 0 0 8px var(--c), inset 0 0 6px var(--c); }
+.click-fx-spark { border-radius: 50%; background: #fff; box-shadow: 0 0 4px 1px var(--c), 0 0 9px 2px var(--c); }
+
+/* background = "E Aurora" (his pick in bg-lab.html): violet base, slow turning colour bands
+   (blurred conic gradient, 60s a turn — transform only, so it runs on the GPU). No vignette (his call). */
+body {
+    background: #170f2e;
+    color: var(--p-ink-dim);
+    font-family: 'Fauna One', Georgia, serif;
+}
+body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+/* a square 150vmax wide, centred: it covers the screen at every turn on any shape (the old
+   inset -30% box let its corners swing past tall / narrow screens = dark patches, 2026-11-18) */
+body::before {
+    inset: auto; left: 50%; top: 50%; width: 150vmax; height: 150vmax; translate: -50% -50%;
+    filter: blur(40px);
+    opacity: .75;
+    background: conic-gradient(from 0deg at 50% 50%, rgba(140, 90, 255, .55), rgba(80, 140, 255, .35), rgba(230, 120, 230, .4), rgba(140, 90, 255, .55));
+    animation: bg-aurora 60s linear infinite;
+}
+@keyframes bg-aurora { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { body::before { animation: none; } }
+
+body, input, textarea, select { color: var(--p-ink-dim); }
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cinzel', serif;
+    color: var(--p-ink);
+    letter-spacing: 0.5px;
+}
+
+strong, b { color: var(--p-gold); }
+
+::selection { background: rgba(168, 128, 255, 0.45); color: #fff; }
+
+html { scrollbar-color: #4a3592 var(--p-bg); scrollbar-gutter: stable; } /* page doesn't hop sideways when a big view hides the scrollbar */
+
+/* ---------- nav = a game HUD strip: deep purple, gold + plum rim along the bottom (= the phone / card
+   rims), cartoony stroked labels (Lilita, like TAP TO PLAY); the current section is gold with a gem ---------- */
+#nav {
+    background: linear-gradient(180deg, #2c1b58 0%, #1c1238 100%);
+    backdrop-filter: none;
+    border-bottom: 0;
+    box-shadow: 0 3px 0 var(--p-gold), 0 6px 0 #452259, 0 10px 22px rgba(0, 0, 0, 0.5);
+}
+
+#nav a {
+    font: 400 19px/1 'Lilita One', system-ui, sans-serif;
+    letter-spacing: 0.6px;
+    color: #fff;
+    -webkit-text-stroke: 4px #452259;
+    paint-order: stroke fill;
+    background: none;
+    transition: transform .2s cubic-bezier(.34, 1.56, .64, 1), color .15s ease;
+}
+
+#nav a:hover { color: var(--p-gold) !important; background: none; transform: translateY(-2px) scale(1.06); }
+#nav a.active { background: none; color: var(--p-gold); }
+/* the current section: a small gold gem sitting on the rim under it */
+#nav a.active:before { content: ''; border: 0; width: 10px; height: 10px; left: 50%; margin-left: -5px; bottom: -2px; transform: rotate(45deg);
+    background: linear-gradient(135deg, #fff2b8, var(--p-gold) 45%, #b8862a); box-shadow: 0 0 0 2px #452259, 0 0 8px rgba(240, 193, 90, .7); }
+
+/* ---------- sections ---------- */
+.wrapper {
+    box-shadow: none;
+    background: transparent;
+    position: relative;
+}
+
+.wrapper + .wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--p-gold-line), transparent);
+}
+
+.wrapper header h2 {
+    color: var(--p-gold);
+    font-weight: 900;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5), 0 0 18px rgba(240, 193, 90, 0.25);
+}
+
+.wrapper header p { color: var(--p-ink-dim); }
+
+/* ---------- hero ---------- */
+#top h1, #top h1 strong { color: #fff; font-family: 'Cinzel', serif; font-weight: 900; }
+
+.hero-title {
+    color: var(--p-ink-dim);
+    font-family: 'Fauna One', serif;
+}
+
+.hero-title::after { background: var(--p-gold); }
+
+.image.fit img.profile-photo {
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px var(--p-gold-soft), 0 0 0 6px rgba(14, 10, 26, 0.9), 0 0 28px rgba(168, 128, 255, 0.5);
+}
+
+/* skills box = the game's purple panel with gem corners */
+.box.style1 {
+    background: none;
+    backdrop-filter: none;
+    border: 52px solid transparent;
+    border-image: url(/ui/panel_bg.png) 120 fill / 52px / 0 stretch;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0.4em 0.6em;
+    max-width: 920px;
+    filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.55));
+}
+
+.skills-icons > div > span {
+    color: var(--p-ink);
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 0.95em;
+}
+
+/* ---------- skills row: idle bob, hover grow + tilt + glow, click pulse + sparkles ---------- */
+.skills-icons > div {
+    position: relative;
+    --rx: 0deg;
+    --ry: 0deg;
+    transition: opacity 0.25s ease, filter 0.25s ease;
+}
+
+.skills-icons .skill-icon {
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+    transform: perspective(300px) rotateX(var(--rx)) rotateY(var(--ry)) scale(1);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s ease;
+    animation: skill-bob 3.2s ease-in-out infinite;
+    animation-delay: var(--bob-delay, 0s);
+}
+
+@keyframes skill-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -4px; } }
+
+/* glow halo behind the hovered icon, pulsing */
+.skills-icons > div::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 35px;
+    width: 96px;
+    height: 96px;
+    margin: -48px 0 0 -48px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(240, 193, 90, 0.55) 0%, rgba(168, 128, 255, 0.35) 40%, transparent 70%);
+    opacity: 0;
+    scale: 0.6;
+    transition: opacity 0.25s ease, scale 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+}
+
+.skills-icons > div:hover::before {
+    opacity: 1;
+    scale: 1;
+    animation: skill-halo 1.4s ease-in-out infinite;
+}
+
+@keyframes skill-halo { 0%, 100% { scale: 0.92; opacity: 0.75; } 50% { scale: 1.12; opacity: 1; } }
+
+.skills-icons > div:hover .skill-icon {
+    transform: perspective(300px) rotateX(var(--rx)) rotateY(var(--ry)) scale(1.3);
+    filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 10px rgba(240, 193, 90, 0.45)) brightness(1.08);
+    animation-play-state: paused;
+    transition: transform 0.12s ease-out, filter 0.25s ease;
+}
+
+.skills-icons > div > span { transition: color 0.2s ease, translate 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.skills-icons > div:hover > span { color: var(--p-gold); translate: 0 8px; }
+
+/* the others step back a little while one is hovered */
+.skills-icons:has(> div:hover) > div:not(:hover) { opacity: 0.55; filter: saturate(0.6); }
+
+/* click: the game's squash pulse */
+/* (hover pauses the bob only — the old single 'paused' froze the tap too, so it never played) */
+.skills-icons .skill-icon.tap,
+.skills-icons > div:hover .skill-icon.tap {
+    animation: skill-tap 0.5s ease-out, skill-bob 3.2s ease-in-out infinite;
+    animation-delay: 0s, var(--bob-delay, 0s);
+}
+.skills-icons > div:hover .skill-icon.tap { animation-play-state: running, paused; }
+@keyframes skill-tap {
+    0%   { scale: 1 1;       rotate: 0deg; }
+    18%  { scale: 1.18 0.78; rotate: 0deg; }
+    40%  { scale: 0.9 1.16;  rotate: -9deg; }
+    58%  { scale: 1.06 0.96; rotate: 6deg; }
+    76%  { scale: 0.98 1.02; rotate: -3deg; }
+    100% { scale: 1 1;       rotate: 0deg; }
+}
+
+.skill-spark {
+    position: absolute;
+    left: 50%;
+    top: 35px;
+    width: var(--sz);
+    height: var(--sz);
+    margin: calc(var(--sz) / -2) 0 0 calc(var(--sz) / -2);
+    background: url(/ui/sparkle.svg) center / contain no-repeat;
+    pointer-events: none;
+    z-index: 2;
+    animation: skill-spark 0.6s ease-out forwards;
+}
+
+@keyframes skill-spark {
+    0% { translate: 0 0; scale: 0.4; opacity: 1; rotate: 0deg; }
+    100% { translate: var(--dx) var(--dy); scale: 1; opacity: 0; rotate: 120deg; }
+}
+
+.skills-icons > div { cursor: var(--cur-press); }
+
+@media (prefers-reduced-motion: reduce) {
+    .skills-icons .skill-icon, .skills-icons > div:hover::before { animation: none; }
+}
+
+/* "Play the game" = the game's cartoony gold HUD button (ui/hud/button_frame_gold.png, baked into one
+   image by playable-nineslice.js [data-hud]); text like the showcase's "TAP TO PLAY" */
+.play-game-btn {
+    display: inline-block;
+    background: no-repeat 0 0 / 100% 100%;
+    border: 0;
+    border-radius: 0;
+    padding: 16px 34px 26px;
+    font: 400 26px 'Lilita One', system-ui, sans-serif;
+    letter-spacing: 1px;
+    color: #fff !important;
+    -webkit-text-stroke: 5px #452259;
+    paint-order: stroke fill;
+    text-shadow: none;
+    box-shadow: none;
+    line-height: 1;
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5));
+    transition: transform .18s cubic-bezier(.2, 1.6, .4, 1), filter .2s ease;
+}
+
+.play-game-btn:hover {
+    transform: scale(1.06);
+    box-shadow: none;
+    background-color: transparent;
+}
+.play-game-btn:active { transform: scale(.95); }
+/* the "this is the one I'd rather you saw" hints (his call 2026-11-11): a gamepad in front of the
+   text, a gold star on the corner, and one quiet line under it for people who land here first */
+.play-game-btn { position: relative; display: inline-flex; align-items: center; gap: 12px; }
+.play-game-btn .pg-pad { width: 40px; height: 27px; flex: none; }
+.play-game-btn .pg-star {
+    position: absolute; top: -14px; right: -14px; width: 38px; height: 38px;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .45));
+    animation: pg-star 2.4s ease-in-out infinite;
+}
+@keyframes pg-star { 0%, 100% { rotate: -8deg; scale: 1; } 50% { rotate: 8deg; scale: 1.12; } }
+.play-game-sub { margin: 10px 0 0; font: 400 16px 'Lilita One', system-ui, sans-serif; letter-spacing: .5px; color: #d9c8f0; opacity: .85; }
+@media (max-width: 520px) {
+    .play-game-btn { font-size: 20px; padding: 14px 24px 22px; gap: 9px; }
+    .play-game-btn .pg-pad { width: 32px; height: 22px; }
+}
+@media (prefers-reduced-motion: reduce) { .play-game-btn .pg-star { animation: none; } }
+/* phones: no blue tap flash on buttons / links */
+* { -webkit-tap-highlight-color: transparent; }
+
+/* ---------- cards = the game's gold/purple frame ---------- */
+.card {
+    background: linear-gradient(180deg, #23174a 0%, #140d2b 100%);
+    background-clip: padding-box;
+    backdrop-filter: none;
+    border: 22px solid transparent;
+    border-image: url(/ui/frame.png) 72 / 22px / 0 stretch;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0.6em 0.6em 0.2em;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: none;
+    filter: drop-shadow(0 14px 26px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 16px rgba(168, 128, 255, 0.45));
+}
+
+.box.style2 h3, .card h3 {
+    color: var(--p-ink);
+    font-family: 'Cinzel', serif;
+    font-weight: 800;
+    font-size: 1.1em;
+}
+
+.preview-video {
+    border: 2px solid var(--p-gold-line);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.preview-video:hover { border-color: var(--p-gold); }
+
+.card .image.featured::after {
+    background: rgba(14, 10, 26, 0.6);
+    color: var(--p-gold);
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+/* frame.png's gold line sits INSIDE its border slice, so a padding-box fill leaves a dark
+   ring between the line and the fill — paint the fill on a layer that reaches the line */
+.card { background: none; isolation: isolate; }
+.card::before {
+    content: '';
+    position: absolute;
+    inset: -12px;
+    z-index: -1;
+    background: linear-gradient(180deg, #23174a 0%, #140d2b 100%);
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+/* projects: every card in a row the same height; a short last row sits in the middle */
+#Projects .row { justify-content: center; }
+#Projects .row > [class*="col-"] { display: flex; }
+#Projects .card { height: calc(100% - 1em); display: flex; flex-direction: column; justify-content: center; }
+
+/* Unity Projects = cards-lab.html "F Clean" (his pick): no frame art — the rounded gameplay video with a
+   gold + plum rim, the title (white, plum stroke, like TAP TO PLAY) + genre over its bottom on a fade */
+#Projects .card { position: relative; border: 0; border-image: none; padding: 0; overflow: hidden; isolation: isolate;
+    border-radius: 18px; background: #0e0a1a; filter: none; justify-content: flex-end;
+    box-shadow: 0 0 0 3px var(--p-gold), 0 0 0 6px #452259, 0 14px 26px rgba(0, 0, 0, .55);
+    transition: transform .3s cubic-bezier(.34, 1.56, .64, 1), box-shadow .3s ease; }
+#Projects .card::before { display: none; }
+#Projects .card { height: auto; align-self: flex-start; width: 100%; }
+#Projects .card .image.featured { margin: 0; border: 0; border-radius: 0; aspect-ratio: 16 / 9; height: auto; }
+#Projects .card .preview-video { border: 0; box-shadow: none; display: block; width: 100%; height: 100%; object-fit: cover; }
+#Projects .card:hover { transform: translateY(-6px); filter: none;
+    box-shadow: 0 0 0 3px var(--p-gold), 0 0 0 6px #452259, 0 18px 30px rgba(0, 0, 0, .6), 0 0 26px rgba(240, 193, 90, .45); }
+.card-label { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 46px 16px 13px; text-align: center; pointer-events: none;
+    background: linear-gradient(#1b103300, #1b1033e6 70%); }
+#Projects .card-label h3 { margin: 0; font: 400 1.6em/1.1 'Lilita One', system-ui, sans-serif; letter-spacing: .5px; color: #fff;
+    -webkit-text-stroke: 5px #452259; paint-order: stroke fill; text-shadow: none; }
+.card-genre { display: block; margin-top: .25em; font-size: .9em; color: #ece6ff; text-shadow: 0 1px 2px rgba(0, 0, 0, .8), 0 0 6px rgba(0, 0, 0, .6); letter-spacing: .3px; }
+/* "View Project": the game's gold HUD button popping up in the middle on hover (replaces model.css's
+   faint text overlay); the video dims a little behind it */
+#Projects .card .image.featured::after { content: none !important; }
+#Projects .card .image.featured { position: relative; }
+#Projects .card .preview-video { transition: filter .3s ease; }
+#Projects .card:hover .preview-video { filter: brightness(.6) saturate(.9); }
+/* centred with auto margins + a whole-px offset (not translate(-50%), which lands on half pixels), and
+   kept on its own GPU layer (will-change): before, the text re-rasterised + hopped a pixel the moment the
+   pop animation ended — the "moves after the anim" */
+.card-cta { position: absolute; left: 0; right: 0; top: 38%; width: max-content; margin: -26px auto 0; z-index: 3;
+    padding: 12px 24px 17px; pointer-events: none; white-space: nowrap;
+    font: 400 21px/1 'Lilita One', system-ui, sans-serif; letter-spacing: .5px; color: #fff; -webkit-text-stroke: 5px #452259; paint-order: stroke fill;
+    background: no-repeat 0 0 / 100% 100%; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .55));
+    will-change: transform, opacity; backface-visibility: hidden;
+    opacity: 0; transform: scale(.7); transition: opacity .2s ease, transform .3s cubic-bezier(.34, 1.56, .64, 1); }
+#Projects .card:hover .card-cta { opacity: 1; transform: scale(1); }
+/* touch screens have no hover: keep it visible, smaller */
+@media (hover: none) { .card-cta { opacity: 1; transform: scale(.8); } }
+
+/* ---------- Education: the certificates as OPEN scrolls (the game's 3D scroll, baked still) ---------- */
+/* images/scroll/open-N.webp = scroll3d.js snapshotOpen(); the unroll animation is off the page (testers
+   found it unclear). Cleaned 2026-11-08: one block per thing, no stacked overrides. */
+.cert-grid { display: flex; flex-direction: column; align-items: center; gap: 2em; padding-top: 0.6em; }
+.cert-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.6em 1.8em; }
+.cert { margin: 0; display: flex; flex-direction: column; align-items: center; text-align: center; width: 290px; }
+.cert-main { width: min(440px, 100%); }
+.cert-frame { all: unset; box-sizing: border-box; display: block; width: 100%; cursor: var(--cur-press) !important;
+    filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .55)); transition: transform .3s cubic-bezier(.34, 1.56, .64, 1), filter .25s ease; }
+.cert-frame img { display: block; width: 100%; height: auto; margin: 0; border-radius: 0; }
+.cert-frame:hover { transform: translateY(-5px) scale(1.03); filter: drop-shadow(0 16px 20px rgba(0, 0, 0, .6)) drop-shadow(0 0 14px rgba(240, 193, 90, .3)); background-color: transparent; }
+.cert-frame:active { background-color: transparent; } /* not main.css's cyan button:active */
+.cert-frame:focus-visible { outline: 2px solid var(--p-gold); outline-offset: 6px; }
+.cert-frame.away { visibility: hidden; }
+/* captions: plain text in the section-subtitle style (.wrapper header p), the subject in gold */
+.cert figcaption { margin-top: .7em; line-height: 1.25; display: flex; flex-direction: column; align-items: center; }
+.cert-sub { margin: 0; font: 300 18.3px/1.48 'Fauna One', Georgia, serif; color: var(--p-ink-dim); }
+
+/* who issued what's under it: a divider line = gold rule fading out | logo | thin rule | short text | gold rule */
+.cert-school { margin: 0 0 -.6em; text-align: center; width: min(900px, 100%); }
+.cert-label { display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%; height: 46px; box-sizing: border-box; }
+.cert-label::before, .cert-label::after { content: ''; flex: 1; height: 1px; margin: 0 6px; background: linear-gradient(90deg, transparent, var(--p-gold-line)); }
+.cert-label::after { background: linear-gradient(90deg, var(--p-gold-line), transparent); }
+.cert-logo { display: block; width: auto; height: 30px; margin: 0; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .4)); }
+.cert-sep { flex: none; width: 1px; height: 22px; background: var(--p-gold-line); }
+.cert-about { font: 300 17px/1.3 'Fauna One', Georgia, serif; color: var(--p-ink-dim); letter-spacing: .2px; text-align: left; }
+.cert-row + .cert-school, .cert-school + .cert-row { margin-top: 0; }
+
+/* full size: grows from its spot over a dark backdrop (certs.js); no caption -- the certificate says it */
+#cert-view { position: fixed; inset: 0; z-index: 10001; display: none; cursor: var(--cur-press); }
+#cert-view.on { display: block; }
+#cert-view .dim { position: absolute; inset: 0; background: rgba(8, 5, 18, 0.88); opacity: 0; transition: opacity .35s ease; }
+#cert-view.lit .dim { opacity: 1; }
+#cert-view .cv-frame { position: fixed; box-sizing: border-box; transform-origin: 0 0; filter: drop-shadow(0 20px 40px rgba(0, 0, 0, .7)); }
+#cert-view .cv-frame img { display: block; width: 100%; height: 100%; object-fit: contain; margin: 0; }
+#cert-view .cv-cap { display: none !important; }
+#cert-view .cv-x { all: unset; position: fixed; top: 24px; right: 24px; width: 50px; height: 50px; cursor: var(--cur-press) !important;
+    background: url(/ui/hud/icon_x.png) center calc(50% - 2px) / 24px no-repeat, url(/ui/hud/button_frame.png) center / 100% 100% no-repeat;
+    filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .4)); opacity: 0; transition: opacity .3s ease, transform .15s ease; }
+#cert-view.lit .cv-x { opacity: 1; }
+#cert-view .cv-x:hover { transform: scale(1.08); }
+body.cert-open { overflow: hidden; }
+
+@media (max-width: 736px) {
+    .cert { width: min(300px, 100%); }
+    .cert-label { flex-direction: column; gap: 8px; height: auto; }
+    .cert-label::before, .cert-label::after, .cert-sep { display: none; }
+    .cert-about { text-align: center; font-size: 16px; }
+}
+
+/* ---------- About ---------- */
+.wrapper.style4 { background: transparent; }
+
+.about-section {
+    background: none !important;
+    border: 52px solid transparent;
+    border-image: url(/ui/panel_bg.png) 120 fill / 52px / 0 stretch;
+    border-radius: 0;
+    box-shadow: none !important;
+    filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.55));
+    max-width: 900px;
+}
+
+/* the inner .container kept its own 800px width + side offset inside the thick frame */
+.about-section .container {
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0.5em 1.5em !important;
+}
+
+.about-section h2 { color: var(--p-gold) !important; }
+.about-section p { color: var(--p-ink-dim) !important; }
+.about-section strong { color: var(--p-gold) !important; }
+
+ul.social li a { background: rgba(168, 128, 255, 0.14) !important; box-shadow: 0 0 0 1px var(--p-gold-line); }
+ul.social li a:before { color: var(--p-gold) !important; background: transparent !important; }
+ul.social { padding-left: 0; }
+ul.social li a:hover { background: rgba(168, 128, 255, 0.34) !important; }
+ul.social li a:hover:before { color: #fff !important; }
+
+/* ---------- modal = the game's focus panel ---------- */
+.modal { background: rgba(8, 5, 18, 0.86); z-index: 10001; }
+
+.modal-content {
+    background: none;
+    border: 64px solid transparent;
+    border-image: url(/ui/panel_bg.png) 120 fill / 64px / 0 stretch;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0 6px;
+    max-width: 900px;
+    max-height: 86vh;
+    margin: 4vh auto;
+    color: var(--p-ink);
+    filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.7));
+}
+
+.modal-close {
+    position: sticky;
+    top: 0;
+    float: right;
+    z-index: 60;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    font-size: 0;
+    color: transparent;
+    background: url(/ui/X.png) center / 100% 100% no-repeat;
+    transition: transform 0.15s ease;
+    margin-left: -44px; /* takes no width, so the title stays truly centred */
+}
+
+.modal-close:hover { transform: scale(1.1); }
+/* X moved out of the scrolling panel by modal.js: pinned to the panel's top-right corner, never over content */
+#projectModal > .modal-close { position: fixed; float: none; margin: 0; z-index: 2; }
+
+.modal-title {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    color: var(--p-gold);
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+#modalDescription { color: var(--p-ink-faint); text-align: center; }
+
+.modal-media-box {
+    background: rgba(8, 5, 18, 0.5);
+    border: 1px solid var(--p-gold-line);
+    border-radius: 10px;
+}
+
+.mechanics-heading {
+    font-family: 'Cinzel', serif;
+    color: var(--p-gold);
+    text-align: center;
+}
+
+.mechanic-title {
+    font-family: 'Cinzel', serif;
+    color: #fff;
+}
+
+.mechanic-description, .modal-description, .animation-description { color: var(--p-ink-dim); }
+.project-card strong, #projectModal .modal-content strong { color: var(--p-gold); }
+
+.mechanic-scripts-label {
+    color: var(--p-gold-soft);
+    font-family: 'Fauna One', serif;
+}
+
+/* script buttons + link badges = small gold-framed chips */
+.snippet-group, .modal-links { background: transparent; }
+
+.snippet-toggle,
+.modal-links a {
+    background: none;
+    border: 13px solid transparent;
+    border-image: url(/ui/button_bg.png) 62 fill / 13px / 0 stretch;
+    border-radius: 0;
+    padding: 0 6px;
+    color: #fff;
+    font-family: 'Fauna One', serif;
+    font-size: 0.85em;
+    line-height: 1.6;
+    max-width: none;
+}
+
+.modal-links a { font-size: 1em; }
+
+.snippet-toggle:hover,
+.modal-links a:hover {
+    background: none;
+    color: #fff;
+    font-weight: normal;
+    transform: translateY(-2px);
+    filter: brightness(1.15) drop-shadow(0 4px 10px rgba(168, 128, 255, 0.5));
+}
+
+.snippet-toggle.active {
+    background: none;
+    color: var(--p-gold);
+    filter: brightness(1.25) drop-shadow(0 0 8px rgba(240, 193, 90, 0.6));
+}
+
+.modal-links a .fa-unity, .modal-links a .fa-github { color: #fff; }
+
+.snippet-content {
+    background: #0b0816;
+    border: 1px solid transparent;
+}
+
+.snippet-content.open { border-color: var(--p-gold-line); }
+
+.snippet-content.open + .resize-handle { background-color: #241a46; border-color: var(--p-gold-line); }
+.snippet-content.open + .resize-handle:hover { background-color: #4a3592; border-color: var(--p-gold); }
+
+/* ---------- game script buttons (game panel.css .scripts) ---------- */
+.snippet-group { gap: 18px; flex-wrap: wrap; padding-top: 2.4em; }
+
+.snippet-toggle.game-script {
+    position: relative;
+    border: 0;
+    border-image: none;
+    background: none;
+    padding: 0;
+    overflow: visible;
+    max-width: none;
+    width: auto !important; flex: none; /* phones: a template rule stretched it full width = gem stuck left (2026-11-18) */
+    filter: none;
+    font-size: 0;
+    box-shadow: none;
+    height: auto;
+    line-height: normal;
+    border-radius: 0;
+}
+
+.snippet-toggle.game-script:hover,
+.snippet-toggle.game-script.active { filter: none; transform: none; }
+
+.gs-btn {
+    width: 66px;
+    height: 66px;
+    background: url(/ui/button_circle.png) center / 100% 100% no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: filter 0.15s, transform 0.15s;
+    filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.35));
+}
+
+.game-script:hover .gs-btn,
+.game-script.active .gs-btn {
+    filter: drop-shadow(0 3px 8px rgba(240, 193, 90, 0.5)) brightness(1.08);
+    transform: translateY(-2px);
+}
+
+.game-script.active .gs-btn { filter: drop-shadow(0 0 12px rgba(240, 193, 90, 0.8)) brightness(1.15); }
+
+.gs-gem { position: relative; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
+
+.gs-gem img {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    filter: saturate(1.15) brightness(1.04) drop-shadow(0 0 3px rgba(143, 214, 148, 0.6)) drop-shadow(0 0 9px rgba(120, 200, 140, 0.4));
+}
+
+.gs-shine, .gl-shine {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.gs-shine { -webkit-mask: url(/ui/csharp.png) center / contain no-repeat; mask: url(/ui/csharp.png) center / contain no-repeat; }
+.gl-shine { -webkit-mask: var(--mask) center / contain no-repeat; mask: var(--mask) center / contain no-repeat; }
+
+.gs-shine::before, .gl-shine::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    height: 160%;
+    width: 16%;
+    left: -50%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9) 50%, transparent);
+    transform: rotate(22deg);
+    mix-blend-mode: screen;
+    animation: gs-glint 5s ease-in-out infinite;
+}
+
+@keyframes gs-glint { 0% { left: -50%; } 13% { left: 135%; } 100% { left: 135%; } }
+
+.gs-tip {
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translate(-50%, 6px);
+    white-space: nowrap;
+    font-family: 'Fauna One', serif;
+    font-size: 13px;
+    color: #fff;
+    letter-spacing: 0.3px;
+    border: 20px solid transparent;
+    border-image: url(/ui/button_bg.png) 60 fill / 20px / 0 stretch;
+    padding: 1px 12px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s, transform 0.15s;
+    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.55));
+    z-index: 8;
+}
+
+.game-script:hover .gs-tip,
+.game-script.active .gs-tip {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.game-script:hover .gs-tip { animation: gs-tipbob 1.8s ease-in-out infinite; }
+@keyframes gs-tipbob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -4px; } }
+
+/* only the hovered tip shows while another one is active */
+.snippet-group:hover .game-script.active:not(:hover) .gs-tip { opacity: 0; }
+
+/* ---------- game link buttons (game panel.css .linkbar) ---------- */
+.modal-links { gap: 16px; }
+
+:is(.modal-links, .social-links) a.game-link {
+    width: 72px;
+    height: 72px;
+    border: 13px solid transparent;
+    border-image: url(/ui/button_bg.png) 62 fill / 13px / 0 stretch;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0;
+    transition: filter 0.15s, transform 0.15s;
+    filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.35));
+}
+
+:is(.modal-links, .social-links) a.game-link:hover {
+    filter: drop-shadow(0 6px 20px rgba(240, 193, 90, 0.55)) brightness(1.08);
+    transform: translateY(-2px);
+}
+
+.gl-gem { position: relative; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; isolation: isolate; }
+.gl-gem img { max-width: 100%; max-height: 100%; display: block; }
+
+.gl-fill {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+    -webkit-mask: var(--mask) center / contain no-repeat;
+    mask: var(--mask) center / contain no-repeat;
+}
+
+.b-unity .gl-fill { background: linear-gradient(180deg, #f1e6ff, #9a6cff); }
+.b-youtube .gl-fill { background: linear-gradient(180deg, #ff9a9a, #d4141c); }
+.b-github .gl-fill { display: none; }
+.b-unity img { filter: drop-shadow(0 0 3px rgba(168, 128, 255, 0.6)) drop-shadow(0 0 10px rgba(168, 128, 255, 0.42)); }
+.b-youtube img { filter: drop-shadow(0 0 3px rgba(255, 72, 72, 0.65)) drop-shadow(0 0 10px rgba(255, 60, 60, 0.45)); }
+.b-github img { filter: drop-shadow(0 0 3px rgba(110, 160, 255, 0.6)) drop-shadow(0 0 10px rgba(90, 140, 255, 0.39)); }
+
+/* links with no brand art: the game's plain gold pill */
+:is(.modal-links, .social-links) a.game-link.pill {
+    width: auto;
+    height: auto;
+    border: 1px solid var(--p-gold-line);
+    border-image: none;
+    background: rgba(240, 193, 90, 0.08);
+    padding: 10px 18px;
+    color: var(--p-gold);
+    font-size: 13px;
+}
+
+/* model.css gives every #modalMedia img a 15px top margin — not these */
+#modalMedia .gl-gem img,
+#modalMedia .gs-gem img { margin: 0; border-radius: 0; }
+
+/* mechanic text, "Scripts:" label and the buttons all share one centre line (like the game) */
+#modalMedia .mechanic-description,
+#modalMedia .mechanic-scripts-label { text-align: center; }
+#modalMedia .mechanic-description { max-width: 620px; margin-left: auto; margin-right: auto; }
+
+/* even spacing around the link row */
+#modalMedia .gameplay-links { margin-top: 18px; padding: 0 0 13px; }
+#modalMedia .snippet-group { padding: 2.4em 0 0.4em; }
+
+/* "Find me on..." row: the same link buttons as the project links */
+.social-links { display: flex; justify-content: center; gap: 18px; margin-top: 0.6em; }
+.social-links .gl-gem img { margin: 0; }
+/* = .b-github: the same blue glow (the glint sweep = .gl-shine, masked to each icon) */
+.b-linkedin img, .b-email img { filter: drop-shadow(0 0 3px rgba(110, 160, 255, 0.6)) drop-shadow(0 0 10px rgba(90, 140, 255, 0.39)); }
+/* "Find me on" row = 3 colours: LinkedIn blue, GitHub violet, mail gold — glow follows each icon's colour */
+.social-links .b-github img { filter: drop-shadow(0 0 3px rgba(170, 120, 255, 0.6)) drop-shadow(0 0 10px rgba(150, 100, 255, 0.42)); }
+.social-links .b-email img { filter: drop-shadow(0 0 3px rgba(255, 200, 90, 0.6)) drop-shadow(0 0 10px rgba(240, 170, 60, 0.42)); }
+.b-linkedin .gl-fill, .b-email .gl-fill { display: none; }
+
+/* ---------- Current Work: the Sett playables in phones (= game styles/showcase.css, frame mode) ---------- */
+.work-head-logo { display: inline-flex; align-items: center; gap: 8px; vertical-align: middle; }
+.work-head-logo img { filter: drop-shadow(0 2px 1.5px rgba(0, 0, 0, .35)); }
+.work-head-logo .head { height: 30px; }
+.work-head-logo .word { height: 18px; filter: brightness(0) invert(1) drop-shadow(0 2px 1.5px rgba(0, 0, 0, .35)); } /* dark wordmark -> white on the dark page */
+
+/* One phone at a time (= the game's Sett station, frame mode): white arrows either side cycle the
+   playables, Portrait / Landscape under it turn the phone in place. Click the phone: the whole
+   showcase goes big over a dark backdrop and the playable loads (sett.js). The area is a square of
+   the phone's long side, so a turn never moves anything around it. */
+.showcase { position: relative; margin-top: 1.2em; }
+.sc-wrap { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.sc-row { display: flex; align-items: center; justify-content: center; gap: 44px; }
+.sc-area { position: relative; flex: none; }
+.sc-shadow { position: absolute; left: 50%; top: 50%; width: 414px; height: 868px; border-radius: 52px; background: #000;
+    opacity: .6; filter: blur(28px); pointer-events: none; }
+.sc-shadow.landscape { width: 868px; height: 414px; }
+.sc-wrap .sc-phone { position: absolute; left: 50%; top: 50%; padding: 12px; border-radius: 52px; background: #0b0a10;
+    box-shadow: 0 0 0 2px #2c2838, 0 0 0 4px var(--p-gold-line); }
+.sc-wrap .sc-screen { position: relative; width: 390px; height: 844px; border-radius: 40px; overflow: hidden; background: #000; }
+.sc-wrap .sc-phone.landscape .sc-screen { width: 844px; height: 390px; }
+.sc-wrap .sc-screen iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.sc-wrap:not(.big) .sc-phone { cursor: var(--cur-press); }
+/* hover: the whole phone grows a little */
+.sc-wrap:not(.big) .sc-area { transition: scale .3s cubic-bezier(.34, 1.56, .64, 1); }
+.sc-wrap:not(.big) .sc-area:hover { scale: 1.05; }
+/* main.css paints every <button> cyan on hover / press: not these */
+/* (no `top` here: Play is positioned by top:66%, and resetting it on hover made it jump away from the
+   pointer, lose the hover, jump back — every frame. That was the "going crazy".) */
+.sc-wrap button:hover, .sc-wrap button:active, .sc-wrap button:focus { background-color: transparent; box-shadow: none; }
+.sc-wrap:not(.big) .sc-area:hover .sc-phone { box-shadow: 0 0 0 2px #2c2838, 0 0 0 4px var(--p-gold), 0 0 26px rgba(240, 193, 90, .4); }
+/* turn: the screen blurs + dims while the phone turns (= game) */
+.sc-screen > * { transition: filter .175s ease-out; }
+.sc-screen::after { content: ''; position: absolute; inset: 0; z-index: 9; pointer-events: none; background: #120d22; opacity: 0; transition: opacity .175s ease-out; }
+.sc-phone.fading .sc-screen > * { filter: blur(12px); }
+.sc-phone.fading .sc-screen::after { opacity: 1; }
+
+/* the white arrows (ui/tour_arrow.png, = the game's showcase arrows) */
+.sc-arrow { all: unset; box-sizing: border-box; flex: none; width: 64px; height: 46px; cursor: var(--cur-press) !important;
+    background: url(/ui/tour_arrow.png) center / contain no-repeat;
+    filter: drop-shadow(0 3px 0 #452259) drop-shadow(0 4px 10px rgba(0, 0, 0, .5)); transition: transform .18s cubic-bezier(.2, 1.6, .4, 1), filter .15s; }
+.sc-arrow.prev { transform: scaleX(-1); }
+.sc-arrow:hover { filter: drop-shadow(0 3px 0 #452259) drop-shadow(0 4px 14px rgba(255, 255, 255, .45)); }
+.sc-arrow.next:hover { transform: scale(1.08); } .sc-arrow.prev:hover { transform: scaleX(-1) scale(1.08); }
+.sc-arrow:active { filter: brightness(.9) drop-shadow(0 3px 0 #452259); }
+
+/* Portrait / Landscape: the game's cream HUD buttons; the one the phone is in is lit */
+.sc-rotate { display: flex; gap: 12px; filter: drop-shadow(0 4px 6px #0008); }
+/* (the frame is baked into ONE image by sett.js, = game NineSlice: no half-pixel seams, sharp when scaled) */
+.sc-orient { all: unset; box-sizing: border-box; width: 90px; height: 90px; padding-bottom: 9px; display: grid; place-items: center;
+    background: no-repeat 0 0 / 100% 100%;
+    cursor: var(--cur-press) !important; opacity: .55; transform: scale(.88); transition: transform .18s cubic-bezier(.2, 1.6, .4, 1), opacity .18s; }
+.sc-orient svg { width: 65px; height: 65px; filter: drop-shadow(0 2px 1.5px rgba(0, 0, 0, .4)); }
+.sc-orient.on { opacity: 1; transform: scale(1); cursor: inherit !important; }
+.sc-orient:not(.on):hover { opacity: 1; transform: scale(1.02); }
+.sc-orient:not(.on):active { transform: scale(.84); }
+
+/* BIG: fixed over a dark backdrop; arrows at the screen edges, Portrait / Landscape at the bottom */
+#play-dim { position: fixed; inset: 0; z-index: 10001; background: rgba(8, 5, 18, 0.88); opacity: 0; pointer-events: none; transition: opacity .35s ease; cursor: var(--cur-press); }
+#play-dim.lit { opacity: 1; pointer-events: auto; }
+.sc-wrap.big { position: fixed; inset: 0; z-index: 10002; pointer-events: none; }
+.sc-wrap.big > *, .sc-wrap.big .sc-row > * { pointer-events: auto; }
+.sc-wrap.big .sc-area { position: fixed; }
+.sc-wrap.big .sc-arrow { position: fixed; top: calc(50% - 23px - 40px); }
+.sc-wrap.big .sc-arrow.prev { left: 28px; } .sc-wrap.big .sc-arrow.next { right: 28px; }
+.sc-wrap.big .sc-rotate { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); }
+.sc-wrap .sc-x { display: none; }
+.sc-wrap.big .sc-x { all: unset; display: block; position: fixed; top: 24px; right: 24px; width: 50px; height: 50px; cursor: var(--cur-press) !important;
+    background: url(/ui/hud/icon_x.png) center calc(50% - 2px) / 24px no-repeat, url(/ui/hud/button_frame.png) center / 100% 100% no-repeat;
+    filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .4)); transition: transform .15s ease; }
+.sc-wrap.big .sc-x:hover { transform: scale(1.08); }
+.sc-wrap.flying .sc-x { opacity: 0; }
+.sc-wrap .sc-arrow { transition: transform .18s cubic-bezier(.2, 1.6, .4, 1), filter .15s, opacity .25s ease; }
+.sc-rotate { transition: opacity .25s ease; }
+.sc-wrap.big .sc-x { transition: transform .15s ease, opacity .25s ease; }
+body.play-open { overflow: hidden; }
+/* narrow screens: the arrows sit over the phone's sides instead of beside it */
+@media (max-width: 640px) {
+    .sc-wrap:not(.big) .sc-row { position: relative; }
+    .sc-wrap:not(.big) .sc-arrow { position: absolute; z-index: 3; top: calc(50% - 23px); }
+    .sc-wrap:not(.big) .sc-arrow.prev { left: 0; } .sc-wrap:not(.big) .sc-arrow.next { right: 0; }
+}
+
+.sc-poster { position: absolute; inset: 0; background: center / cover no-repeat; overflow: hidden; }
+.sc-poster::after { content: ''; position: absolute; inset: 0; background: linear-gradient(#0000 55%, #0006); }
+.sc-poster .sc-logo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; z-index: 1; margin: 0; }
+.sc-dot { position: absolute; border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle, #fff 0, #fff 14%, #ffffff8c 26%, #ffffff26 48%, #fff0 70%); box-shadow: 0 0 10px 1px #ffffff2e;
+    animation: sc-dotBob var(--bob) ease-in-out var(--d) infinite alternate, sc-dotTw var(--tw) ease-in-out var(--d) infinite alternate; }
+@keyframes sc-dotBob { to { transform: translate(var(--sx), var(--sy)); } }
+@keyframes sc-dotTw { from { opacity: var(--o0); } to { opacity: var(--o1); } }
+
+/* Play: the gold HUD button, softly pulsing (the base theme's <button> look is reset first) */
+.sc-phone .sc-play { all: unset; box-sizing: border-box; position: absolute; left: 50%; top: 66%; margin: -56px 0 0 -56px; z-index: 2;
+    width: 112px; height: 112px; padding-bottom: 10.6px; display: grid; place-items: center; cursor: var(--cur-press) !important;
+    background: url(/ui/hud/button_frame_gold.png) 0 0 / 100% 100% no-repeat;
+    filter: drop-shadow(0 6px 10px #0009); transition: transform .18s cubic-bezier(.2, 1.6, .4, 1); }
+/* the pulse = a separate glow behind Play, fading in/out (opacity only). An ANIMATED filter on the button
+   made it vanish while the phone grew on hover (Chrome re-raster glitch) — his "goes crazy" */
+.sc-play-glow { position: absolute; left: 50%; top: 66%; width: 190px; height: 190px; margin: -95px 0 0 -95px; z-index: 1; pointer-events: none;
+    background: radial-gradient(circle, #ffd75e88 0, #ffd75e33 40%, #ffd75e00 66%); opacity: .15; animation: sc-playGlow 1.6s ease-in-out infinite; }
+@keyframes sc-playGlow { 50% { opacity: 1; } }
+.sc-phone.landscape .sc-play-glow { top: 80%; width: 150px; height: 150px; margin: -75px 0 0 -75px; }
+.sc-phone .sc-play svg { width: 54px; height: 54px; filter: drop-shadow(0 2px 1.5px rgba(0, 0, 0, .4)); }
+.sc-wrap.big .sc-play:hover { transform: scale(1.08); }
+.sc-wrap.big .sc-play:active { transform: scale(.94); }
+.sc-phone .sc-play:hover, .sc-phone .sc-play:active { background-color: transparent; }
+/* small view: the whole phone reacts to hover, the Play button doesn't (it fought the phone's grow) */
+.sc-wrap:not(.big) .sc-play { transition: none; }
+/* landscape (= game): Play lower + smaller, no "TAP TO PLAY", so the title stays clear */
+.sc-phone.landscape .sc-play { top: 80%; width: 88px; height: 88px; margin: -44px 0 0 -44px; padding-bottom: 8.3px; }
+.sc-phone.landscape .sc-play svg { width: 42px; height: 42px; }
+.sc-phone.landscape .sc-tap { display: none; }
+@keyframes sc-playPulse { 50% { filter: drop-shadow(0 6px 10px #0009) drop-shadow(0 0 20px #ffd75e99); } }
+.sc-tap { position: absolute; left: 0; right: 0; top: calc(66% + 74px); text-align: center; z-index: 2; color: #fff;
+    font: 400 26px 'Lilita One', system-ui; letter-spacing: 1px; -webkit-text-stroke: 5px #452259; paint-order: stroke fill; pointer-events: none; }
+
+/* the game's loading screen, inside the phone */
+.sc-loading { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 28px; background: #1b1430; transition: opacity .5s ease; }
+.sc-loading.done { opacity: 0; pointer-events: none; }
+.sc-loading .sleeper { position: relative; width: min(320px, 72%); }
+.sc-loading .sleeper img { display: block; width: 100%; height: auto; margin: 0; }
+.sc-loading .z { position: absolute; left: 79%; top: 4%; opacity: 0; font: 400 28px 'Lilita One', system-ui, sans-serif; color: #fff;
+    -webkit-text-stroke: 5px #452259; paint-order: stroke fill; animation: sc-load-z 2.4s ease-out infinite; }
+.sc-loading .z:nth-child(3) { animation-delay: .8s; } .sc-loading .z:nth-child(4) { animation-delay: 1.6s; }
+.sc-loading .label { font: 400 24px 'Lilita One', system-ui, sans-serif; letter-spacing: 2px; color: #fff; -webkit-text-stroke: 5px #452259; paint-order: stroke fill; }
+.sc-loading .label span { display: inline-block; opacity: 0; transform-origin: 50% 80%; animation: sc-load-ch 2.4s infinite; animation-delay: calc(var(--i) * .07s); }
+@keyframes sc-load-ch {
+    0% { opacity: 0; transform: translateY(6px) scale(.2) rotate(-12deg); animation-timing-function: cubic-bezier(.2, 1.6, .45, 1); }
+    4.3% { opacity: 1; } 11% { opacity: 1; transform: none; }
+    80% { opacity: 1; transform: none; animation-timing-function: ease-in; }
+    92% { opacity: 0; transform: scale(.6); } 100% { opacity: 0; transform: scale(.6); } }
+@keyframes sc-load-z {
+    0% { opacity: 0; transform: translate(0, 0) scale(.4) rotate(-12deg); } 15% { opacity: 1; } 70% { opacity: 1; }
+    100% { opacity: 0; transform: translate(46px, -110px) scale(1.25) rotate(12deg); } }
+
+
+/* ---------- phones: thinner frames ---------- */
+@media (max-width: 736px) {
+    .box.style1, .about-section { border-width: 34px; border-image-width: 34px; }
+    .modal-content { border-width: 38px; border-image-width: 38px; width: 96%; }
+    .card { border-width: 16px; border-image-width: 16px; }
+}
+
+/* ---------- screen-size pass (2026-11-18, his iPad portrait + phone portrait notes) ---------- */
+/* About Me (2026-11-18): the opening line as a big gold outlined quote, the closing line in a soft
+   gold framed box with its key words outlined (= the Mac lab's classic-lab-links.css) */
+/* the lead line: its own clear line between the heading and the sign (it got lost between them) */
+/* the title sits above the panel (index.html .about-title): panel closer under it, no empty band on top */
+#About .about-title header { margin-bottom: 0; }
+/* the title a lot bigger than the other section titles (his call 2026-11-18) */
+#About .about-title h2 { font-size: 3.2em; line-height: 1.15; }
+@media (max-width: 517px) { #About .about-title h2 { font-size: 2.4em; } }
+/* the panel's body text: bigger, brighter, more air (beats .about-section p's dim !important ink) */
+#about .container > p:not(.ab-quote):not(.ab-close) { font-size: 1.22em; line-height: 1.75; color: #e6def7 !important; }
+@media (max-width: 517px) { #about .container > p:not(.ab-quote):not(.ab-close) { font-size: 1.12em; line-height: 1.7; } }
+#About .about-section { margin-top: 1.2em; padding-top: 2.2em; }
+/* hierarchy (his pick "9", 2026-11-18): GAME ON! = the hero; the sub-title above it calmer (cream,
+   outlined game lettering) on ONE row, scaled to the panel's width (cqi = % of #about .container);
+   body bold words white + a bit bigger; the closing line's gold = the 2nd highlight */
+#about .container { container-type: inline-size; }
+#about .ab-quote .ab-lead { display: block; margin: 0 auto; white-space: nowrap;
+    font: 400 min(1.75em, 4.1cqi)/1.3 'Lilita One', system-ui, sans-serif; /* bigger (his ask 2026-11-18; was 1.45em / 3.45cqi) */ letter-spacing: 1px; word-spacing: 3px; color: #f3e7c4;
+    -webkit-text-stroke: 5px #452259; paint-order: stroke fill; text-shadow: 0 3px 8px #1d1a1f; }
+/* phones: one row would be ~10 px, so two even rows at a readable size */
+@media (max-width: 600px) { #about .ab-quote .ab-lead { white-space: normal; text-wrap: balance; font-size: min(1.3em, 7.8cqi); -webkit-text-stroke-width: 4px; } }
+@media (max-width: 380px) { #about .ab-quote .ab-lead { font-size: 18px; } } /* small phones: 3 rows beat 13 px */
+@supports (-webkit-touch-callout: none) { #about .ab-quote .ab-lead { text-shadow: none; } }
+#about .container > p:not(.ab-quote):not(.ab-close) strong { color: #fff !important; font-size: 1.1em; }
+#about .ab-quote { margin: 0 0 2.6em; font-size: 1.22em; line-height: 1.5; color: #fff !important; } /* (beats .about-section p's !important dim ink); 2.6em under the sign > the gap above it */
+/* "GAME ON!": an arcade neon sign — pixel letters (Press Start 2P, /fonts) in a pink neon tube, cyan
+   gamepads either side; flickers on in view (assets/js/game-on.js), then hums */
+@font-face { font-family: 'Press Start 2P'; font-style: normal; font-weight: 400; font-display: swap;
+    src: url(/fonts/pressstart2p-latin.woff2) format('woff2'); }
+.about-section .ab-quote .go-neon { position: relative; display: inline-flex; align-items: center; gap: .9em; margin-top: 1.2em; padding: .7em 1em .6em;
+    font: .9em/1.3 'Press Start 2P', monospace; letter-spacing: 2px; color: #fff; white-space: nowrap;
+    border: 3px solid #ff4fd8; border-radius: 14px; opacity: 0;
+    text-shadow: 0 0 4px #fff, 0 0 10px #ff4fd8, 0 0 22px #ff4fd8; box-shadow: 0 0 10px #ff4fd8, inset 0 0 10px #ff4fd8aa; }
+.about-section .ab-quote .go-neon.play { animation: goFlicker .9s steps(1) forwards, goHum 4s 1.5s infinite; }
+@keyframes goFlicker { 0% { opacity: 0 } 10% { opacity: 1 } 18% { opacity: .15 } 30% { opacity: 1 } 38% { opacity: .3 } 52%, 100% { opacity: 1 } }
+@keyframes goHum { 0%, 92%, 100% { opacity: 1 } 94% { opacity: .55 } 96% { opacity: 1 } 97% { opacity: .7 } }
+.about-section .ab-quote .go-pad { width: 1.9em; height: 1.3em; flex: none; filter: drop-shadow(0 0 4px #4ff0ff) drop-shadow(0 0 10px #4ff0ff); }
+/* his pick "I" (game-on-lab 2026-11-18): pink marquee bulbs chase round the sign, each letter's glow cycles
+   pink > cyan > gold in a wave, the pads' 2 buttons blink in turn. Hover: letters hop + pads wiggle, ADDED on top of the
+   running loops (same animation list + an extra entry = nothing restarts); bulbs race via playbackRate in game-on.js. */
+.about-section .ab-quote .go-neon .gl { display: inline-block; }
+.about-section .ab-quote .go-neon::before { content: ''; position: absolute; border-radius: 20px; padding: 7px; pointer-events: none;
+    inset: calc(-12px - var(--by, 0px)) calc(-12px - var(--bx, 0px)); /* --bx/--by (game-on.js) make the ring a whole number of 14 px bulbs = no half bulbs on the right / bottom */
+    background: radial-gradient(circle, #ffe3f7 0 2px, #ff4fd8 2.5px 3px, transparent 3.5px) 0 0 / 14px 14px;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+    animation: goChase 1.2s linear infinite; filter: drop-shadow(0 0 3px #ff4fd8); }
+@keyframes goChase { to { background-position: 14px 0; } }
+.about-section .ab-quote .go-neon.play .gl { animation: goHue 3s calc(var(--i) * .12s) linear infinite; }
+.about-section .ab-quote .go-neon.play:hover .gl { animation: goHue 3s calc(var(--i) * .12s) linear infinite, goHop .5s calc(var(--i) * 45ms) ease-out; }
+@keyframes goHue { 0%, 100% { text-shadow: 0 0 4px #fff, 0 0 10px #ff4fd8, 0 0 22px #ff4fd8; }
+    33% { text-shadow: 0 0 4px #fff, 0 0 10px #4ff0ff, 0 0 22px #4ff0ff; } 66% { text-shadow: 0 0 4px #fff, 0 0 10px #ffd23f, 0 0 22px #ffd23f; } }
+@keyframes goHop { 40% { translate: 0 -.35em; scale: 1.15; } }
+.about-section .ab-quote .go-neon:hover .go-pad { animation: goPadWig .5s ease-in-out; }
+@keyframes goPadWig { 25% { transform: rotate(-12deg) scale(1.1); } 75% { transform: rotate(12deg) scale(1.1); } }
+.about-section .ab-quote .go-neon.play .go-pad circle { animation: goPadBtn .9s steps(1) infinite; }
+.about-section .ab-quote .go-neon.play .go-pad circle + circle { animation-delay: .45s; }
+@keyframes goPadBtn { 50% { fill: #ff4fd8; } }
+@media (prefers-reduced-motion: reduce) { .about-section .ab-quote .go-neon { opacity: 1; animation: none !important; }
+    .about-section .ab-quote .go-neon::before, .about-section .ab-quote .go-neon .gl, .about-section .ab-quote .go-neon .go-pad circle { animation: none !important; } }
+@media (max-width: 517px) { .about-section .ab-quote .go-neon { font-size: .72em; gap: .6em; padding: .7em .8em .6em; margin-top: 2.6em; } } /* phones: more air under the 3-row lead (his ask) */
+.about-section .nowrap { white-space: nowrap; }
+/* the closing line on the game's mascot speech-bubble art (data-hud="panel", baked by playable-nineslice.js):
+   plain dark-purple Lilita on the cream (white outlined text smudged there), key words gold with the purple outline */
+#about .ab-close { margin: 1.8em auto 1.6em; padding: 0 20px; max-width: 640px; border: 0; background: none; /* (no bubble art: his call 2026-11-18) */
+    /* = the game's tutorial bubble text (src/styles/tutorial.css .tut-text, big bubble 22/30 px; here a bit bigger) */
+    font: 400 26px/34px 'Lilita One', system-ui, sans-serif; letter-spacing: 1px; word-spacing: 3px; color: #fff !important;
+    -webkit-text-stroke: 4px #452259; paint-order: stroke fill; text-shadow: 0 2px 7.5px #1d1a1f; text-wrap: balance; }
+/* its *special words* = the game's .tut-text .hl */
+#about .ab-close span { font-size: 1.1em; color: #f3bd35; -webkit-text-stroke: 5px #38144d; }
+@media (max-width: 517px) { #about .ab-close { font-size: 22px; line-height: 30px; padding: 0 8px; } }
+/* iPhone / iPad: WebKit paints text-shadow over the outline (smudge) — shadow under the lettering instead (= the game) */
+@supports (-webkit-touch-callout: none) { #about .ab-close { text-shadow: none; } }
+/* Samsung Internet phones: "open in Chrome" prompt (assets/js/open-in-chrome.js) = the game's mascot bubble */
+#chrome-offer { position: fixed; inset: 0; z-index: 20001; display: grid; place-items: center; padding: 16px;
+    background: rgba(8, 5, 18, .78); animation: co-in .25s ease-out; }
+#chrome-offer.out { opacity: 0; transition: opacity .25s ease; }
+@keyframes co-in { from { opacity: 0; } }
+body.chrome-offer-on { overflow: hidden; }
+#chrome-offer .co-pop { display: flex; flex-direction: column; align-items: center; max-width: 360px; animation: co-pop .35s cubic-bezier(.2, 1.5, .45, 1); }
+@keyframes co-pop { from { transform: scale(.6); opacity: 0; } }
+#chrome-offer .co-mascot { width: 150px; height: auto; margin-bottom: -14px; position: relative; z-index: 0; filter: drop-shadow(0 6px 10px #0008); }
+#chrome-offer .co-bubble { position: relative; z-index: 1; border: 0; /* in front of the mascot (his call) */ padding: 30px 28px 26px; background: no-repeat 0 0 / 100% 100%; text-align: center;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, .45)); }
+#chrome-offer p { margin: 0 0 18px; font: 400 21px/1.35 'Lilita One', system-ui, sans-serif; letter-spacing: .5px; color: #fff;
+    -webkit-text-stroke: 4px #452259; paint-order: stroke fill; }
+#chrome-offer p b { color: var(--p-gold, #f0c15a); font-weight: 400; text-transform: uppercase; }
+#chrome-offer .co-logo { width: 22px; height: 22px; vertical-align: -3px; }
+#chrome-offer .co-btns { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+#chrome-offer button { all: unset; box-sizing: border-box; cursor: pointer; text-align: center; background: no-repeat 0 0 / 100% 100%;
+    font: 400 19px/1 'Lilita One', system-ui, sans-serif; letter-spacing: .6px; -webkit-text-stroke: 4px #452259; paint-order: stroke fill;
+    transition: transform .15s cubic-bezier(.2, 1.6, .4, 1); }
+#chrome-offer button:active { transform: scale(.93); }
+#chrome-offer .co-open { padding: 13px 26px 19px; color: #fff; }
+#chrome-offer .co-stay { padding: 10px 20px 15px; font-size: 16px; color: #fff !important; } /* purple HUD button, white outlined text like Open */
+/* X buttons: squash-pulse on press, then they close (assets/js/x-pulse.js) */
+.x-pulse { animation: x-pulse .17s cubic-bezier(.3, 1.6, .5, 1) !important; }
+@keyframes x-pulse { 0% { scale: 1; } 40% { scale: .82; } 75% { scale: 1.12; } 100% { scale: 1; } }
+/* phones: an open project panel only scrolls up / down (something inside was a few px too wide,
+   so it also dragged sideways — his call 2026-11-18) */
+@media (max-width: 600px) {
+    #projectModal, #projectModal .modal-content { overflow-x: hidden; overscroll-behavior-x: none; touch-action: pan-y; }
+}
+/* a nine-slice button waiting for its baked frame (playable-nineslice.js keep): hidden, so its
+   text / icon never shows before the art */
+.ns-wait { opacity: 0 !important; }
+/* nav: always ONE line — under 980 px the labels shrink with the width (5 labels = ~37 font-sizes
+   wide with 0.5em padding) instead of wrapping "About Me" onto a 2nd row over the hero */
+#nav ul { white-space: nowrap; }
+@media (max-width: 980px) {
+    #nav a { font-size: min(19px, calc((100vw - 24px) / 31)); padding: 0 0.45em; -webkit-text-stroke-width: 0.21em; }
+}
+/* skills: when 8 don't fit one row, two even rows of 4 (not 7 + 1 / 3 + 3 + 2) */
+@media (max-width: 920px) {
+    .skills-icons { display: grid; grid-template-columns: repeat(4, auto); justify-content: center; justify-items: center; }
+    .skills-icons > div > span { text-align: center; }
+}
+/* phones: more room between the Unity Projects intro line and the first card */
+@media (max-width: 517px) {
+    #Projects header { margin-bottom: 1.5em; }
+}
+@media (max-width: 400px) { .skills-icons { column-gap: 0.4em; } }
+/* phones: TECH / ARTIST were 13 px (main.css #top p outranks tech-art-title.css), and their
+   board / brush stick out a fixed 12 px, so they overlapped. Bigger, gap in em = always apart */
+@media (max-width: 517px) {
+    #top p.hero-title.ta-title { font-size: 24px; }
+}
+/* skills in 2 rows: the framed box hugs them instead of spanning the column */
+@media (max-width: 920px) {
+    .box.style1:has(> .skills-icons) { width: fit-content; max-width: 100%; margin-left: auto !important; margin-right: auto !important; }
+}
+
+/* phones: a tapped playable goes FULLSCREEN and plays (= the game's phone mode, showcase.css .sc.fs):
+   a thin phone frame round the screen, the HUD X top-left, no arrows / Portrait-Landscape;
+   follows the phone's orientation. sett.js isPhone / expand() */
+.sc-wrap.fs { --fs-gap: 5px; --fs-top: max(5px, env(safe-area-inset-top)); --fs-frame: 4px; --fs-r: 38px; }
+.sc-wrap.fs .sc-area { position: fixed; inset: 0; z-index: 10002; width: auto !important; height: auto !important; scale: none; background: rgba(8, 5, 18, .88); }
+.sc-wrap.fs .sc-shadow, .sc-wrap.fs .sc-arrow, .sc-wrap.fs .sc-rotate { display: none !important; }
+.sc-wrap.fs .sc-phone { left: var(--fs-gap); right: var(--fs-gap); top: var(--fs-top); bottom: var(--fs-gap); padding: var(--fs-frame);
+    border-radius: var(--fs-r); box-shadow: 0 0 0 2px #2c2838, 0 10px 30px #0009; transform: none !important; }
+.sc-wrap.fs .sc-screen, .sc-wrap.fs .sc-phone.landscape .sc-screen { width: 100%; height: 100%; border-radius: calc(var(--fs-r) - var(--fs-frame)); }
+.sc-wrap.fs .sc-x { all: unset; display: block; position: fixed; z-index: 10003; pointer-events: auto; /* (unset inherited .big's none = taps went through to the playable) */ --fs-in: calc((var(--fs-r) - var(--fs-frame)) * .3);
+    left: calc(var(--fs-gap) + var(--fs-frame) + var(--fs-in)); top: calc(var(--fs-top) + var(--fs-frame) + var(--fs-in)); width: 44px; height: 44px;
+    background: url(/ui/hud/icon_x.png) center calc(50% - 2px) / 21px no-repeat, url(/ui/hud/button_frame.png) center / 100% 100% no-repeat;
+    filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .4)); }
+.sc-wrap.fs .sc-x:active { transform: scale(.9); }
+/* portrait: never wider than half its height (browser bars squash the playables' tall layout) */
+.sc-wrap.fs:not(.land) { --fs-w: min(calc(100vw - 2 * var(--fs-gap)), calc((100dvh - var(--fs-top) - var(--fs-gap)) * .5)); --fs-side: calc((100vw - var(--fs-w)) / 2); }
+.sc-wrap.fs:not(.land) .sc-phone { left: var(--fs-side); right: var(--fs-side); }
+.sc-wrap.fs:not(.land) .sc-x { left: calc(var(--fs-side) + var(--fs-frame) + var(--fs-in)); }
+/* phones: no Portrait / Landscape buttons — the phone's own rotation turns the mockup (sett.js phoneMatch) */
+.sc-wrap.on-phone .sc-rotate { display: none; }
+/* turned: the playable's orientation differs from how the phone is held — the framed screen turns
+   90° to fill the phone (its own size = the phone's sides swapped); the X goes to the game's own
+   top-left corner, turned with it. sett.js fsOrient */
+.sc-wrap.fs:is(.turn-cw, .turn-ccw) .sc-phone { left: 50%; top: 50%; right: auto; bottom: auto;
+    width: calc(100dvh - 2 * var(--fs-gap)); height: calc(100vw - 2 * var(--fs-gap)); }
+.sc-wrap.fs.turn-cw .sc-phone { transform: translate(-50%, -50%) rotate(90deg) !important; }
+.sc-wrap.fs.turn-ccw .sc-phone { transform: translate(-50%, -50%) rotate(-90deg) !important; }
+.sc-wrap.fs.turn-cw .sc-x { left: auto; right: calc(var(--fs-gap) + var(--fs-frame) + var(--fs-in)); rotate: 90deg; }
+.sc-wrap.fs.turn-ccw .sc-x { top: auto; bottom: calc(var(--fs-gap) + var(--fs-frame) + var(--fs-in)); left: calc(var(--fs-gap) + var(--fs-frame) + var(--fs-in)); rotate: -90deg; } /* 4 across still fits a 360 px phone */

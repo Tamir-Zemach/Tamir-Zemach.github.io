@@ -1,0 +1,20 @@
+{
+  "title": "Sett — AI Playables",
+  "description": "AI Tech Artist · Mobile UA Creatives",
+  "playables": [
+    {
+      "title": "Merge Quest",
+      "description": "Merge-2 playable · Pixi.js · 2.0 MB",
+      "thumbnail": "/media/sett/merge2_card.jpg",
+      "posterBase": "/media/sett/merge2",
+      "file": "/playables/merge2.html?v=2026-10-26"
+    },
+    {
+      "title": "Debug Squad",
+      "description": "Squad shooter playable · three.js · 4.4 MB",
+      "thumbnail": "/media/sett/shooter_card.jpg",
+      "posterBase": "/media/sett/shooter",
+      "file": "/playables/shooter.html?v=2026-11-06"
+    }
+  ]
+}

@@ -1,0 +1,600 @@
+/* -----------------------------------------------
+   Unified Card Styling (Projects, Tools, Animations)
+   ----------------------------------------------- */
+
+/* Shared card container */
+.card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    background-color: #e6c28b4f; /* slightly more opaque */
+    box-shadow:
+            0 10px 30px rgba(0, 0, 0, 0.2),
+            0 0 0 1px rgba(255, 255, 255, 0.3); /* subtle border glow */
+
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    width: 100%;
+    max-width: 400px;
+    margin: 0.5em auto;
+    z-index: 1;
+
+    backdrop-filter: blur(6px); /* stronger glassy effect */
+    padding: 1.5em;
+    text-align: center;
+    border: 5px solid #67bab670;
+}
+
+
+/* Hover effect */
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+}
+
+/* Featured media container */
+.card .image.featured {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    width: 100%;
+    margin: 0;
+    transform: translateZ(0);
+    will-change: transform, opacity;
+    z-index: 0;
+}
+
+/* Image transform on hover */
+.card .image.featured img {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.card:hover .image.featured img {
+    transform: scale(1.05);
+}
+
+/* Overlay base styles */
+.card .image.featured::after {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: rgba(103, 186, 182, 0.9);
+    font-size: 1.2em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+    pointer-events: none;
+    backface-visibility: hidden;
+    border-radius: 6px
+}
+
+/* Show overlay on hover */
+.card:hover .image.featured::after {
+    opacity: 1;
+}
+
+/* Different overlay text per type */
+.project-card .image.featured::after {
+    content: "View Project";
+}
+
+.sett-card .image.featured::after {
+    content: "View Playables";
+}
+
+/* Skills row: 8 icons rendered from the game's GLBs */
+.skills-icons .skill-icon {
+    height: 70px;
+    width: 70px;
+    object-fit: contain;
+}
+
+.skills-icons {
+    gap: 1.8em 1.2em;
+}
+
+.skills-icons > div {
+    min-width: 64px;
+}
+
+.play-game-row {
+    text-align: center;
+    margin-top: 0.4em;
+}
+
+.skills-icons > div > span {
+    margin-top: 0.5em;
+    font-size: 1.1em;
+}
+
+/* "Play the game" button in the hero */
+.play-game-btn {
+    display: inline-block;
+    margin-top: 0.8em;
+    padding: 0.6em 1.8em;
+    border-radius: 999px;
+    background: rgba(103, 186, 182, 1);
+    color: #fff !important;
+    font-weight: bold;
+    text-decoration: none;
+    border-bottom: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.play-game-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+}
+
+/* Education: IAC diploma big, Udemy certificates beside it */
+.edu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5em;
+    text-align: center;
+}
+
+.edu-card {
+    display: block;
+    padding: 1em;
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 0;
+}
+
+.edu-card img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 6px;
+    display: block;
+}
+
+.edu-card h3 {
+    font-size: 1em;
+    margin: 0.7em 0 0.2em;
+}
+
+.edu-card p {
+    margin: 0;
+    opacity: 0.7;
+}
+
+.edu-main {
+    grid-column: 1 / -1;
+    max-width: 520px;
+    justify-self: center;
+    width: 100%;
+}
+
+@media (max-width: 736px) {
+    .edu-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Sett card: portrait art cropped to the same 16:9 as the video cards */
+.sett-card .image.featured img.preview-video {
+    aspect-ratio: 16 / 9;
+    height: auto;
+    object-fit: cover;
+    object-position: center 42%;
+}
+
+/* Sett playables: phone-shaped frame, click-to-load */
+.sett-frame {
+    width: min(100%, 360px);
+    aspect-ratio: 9 / 16;
+    max-height: 75vh;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #111;
+}
+
+.sett-frame iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+}
+
+.sett-play {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+    background: #111;
+}
+
+.sett-play img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.sett-play-label {
+    position: absolute;
+    left: 50%;
+    top: 78%;
+    transform: translate(-50%, -50%);
+    padding: 0.5em 1.6em;
+    border-radius: 999px;
+    background: rgba(103, 186, 182, 0.95);
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.sett-play:hover .sett-play-label {
+    background: rgba(103, 186, 182, 1);
+    transform: translate(-50%, -50%) scale(1.06);
+}
+
+.tool-card .image.featured::after {
+    content: "View Tools";
+}
+
+.animation-card .image.featured::after {
+     content: "View Animations";
+ }
+
+.modal-card .image.featured::after {
+    content: "View Models";
+}
+
+.preview-video {
+    width: 100%;
+    border-radius: 6px;
+    border: 5px solid #67bab670;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* optional depth */
+}
+
+.preview-video:hover {
+    transform: scale(1.02);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ------------------------------------------------------ Modal background  ------------------------------------------------------*/
+.modal {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    overflow-y: auto;
+    transition: opacity 0.3s ease;
+}
+
+
+/* ------------------------------------------------------ Modal content box  ------------------------------------------------------*/
+.modal-content {
+    background: #1c1c1c;
+    color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 800px;
+    width: 90%;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+
+    max-height: 80vh;
+    /* contain within viewport */
+    overflow-y: scroll;
+    /* allow scrolling */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+
+    position: relative;
+    /* ensures sticky positioning has a reference */
+
+}
+
+.modal-content::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+}
+
+/* Prevent background scroll when modal is open */
+body.modal-open {
+    overflow: hidden;
+}
+
+/* Close button */
+.modal-close {
+    float: right;
+    font-size: 28px;
+    cursor: pointer;
+    color: #aaa;
+    padding: 10px;
+}
+
+.modal-close:hover {
+    color: #fff;
+}
+
+
+/* Media inside modal */
+/* Strong keyword styling inside project cards & modals */
+.project-card strong,
+#projectModal .modal-content strong {
+    color: #c5c5c5;           
+}
+
+#modalMedia video {
+    width: 50%;
+    /* shrink to 70% of modal width */
+    max-width: 500px;
+    /* cap at 500px */
+    display: block;
+    /* so margin auto works */
+    margin: 15px auto;
+    /* centers horizontally */
+    border-radius: 6px;
+}
+
+#modalMedia img {
+    width: 100%;
+    /* keep images full width if you like */
+    border-radius: 6px;
+    margin-top: 15px;
+}
+
+.modal-links {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 40px;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    background-color: #1c1c1c;
+    border-radius: 6px;
+}
+
+.modal-links.bottom-links {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+
+.modal-links a {
+    color: #f0f0f0; /* lighter text for contrast */
+    text-decoration: none;
+    font-size: 1.2em; /* slightly smaller so badges don’t overwhelm */
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px; /* add padding for button-like feel */
+    border-radius: 6px;
+}
+
+.modal-links a:hover {
+    color: #303030; 
+    font-weight: bold;
+    background-color: #bbc1c1; /* brighten background on hover */
+    transform: translateY(-2px); /* slight lift effect */
+}
+
+.modal-links a .fa-youtube {
+    color: #FF0000;
+}
+
+
+.modal-links a .fa-unity {
+    color: #9aa0a6; /* lighter gray-blue */
+}
+
+.modal-links a .fa-github {
+    color: #c0c0c0; /* light gray for contrast */
+}
+
+.modal-links a:hover .fa-unity,
+.modal-links a:hover .fa-github,
+.modal-links a:hover .fa-youtube {
+    color: #ffffff;
+}
+
+.modal-media-box {
+    position: relative;
+    overflow: visible;
+    margin-bottom: 2em;
+    /* spacing between sections */
+    background: #2a2a2a;
+    /* optional: give each section its own box feel */
+    border-radius: 6px;
+    padding: 10px;
+}
+
+/* Special styling for modal title */
+.modal-title {
+    font-size: 1.8rem;       /* Larger text */
+    font-weight: bold;       /* Strong emphasis */
+    color: rgba(255, 255, 255);          /* Dark slate color */
+    text-align: center;      /* Centered in modal */
+    margin-bottom: 1rem;  
+    margin-top: 1em;/* Space below */
+    letter-spacing: 1px;     /* Slight spacing for elegance */
+    text-transform: uppercase; /* Optional: all caps */
+}
+.animation-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 0.5em;
+}
+
+.mechanics-heading {
+    color:  #ffffff;
+    font-size: 1.6em;
+    font-weight: 700;
+    margin: 1em 0 0.5em;
+    text-align: left;
+}
+
+.mechanic-title {
+    font-size: 1.3em;
+    font-weight: 700;
+    margin-bottom: 0.3em;
+    color: #ffffff;
+    text-align: center;
+}
+
+/* Unified description style for modals, animations, and tools */
+.mechanic-description,
+.modal-description,
+.animation-description {
+    font-size: 1em;
+    line-height: 1.5;
+    margin-bottom: 0.5em;
+    color: rgb(126, 126, 126);
+    font-weight: 500;
+}
+
+.mechanic-scripts-label {
+    font-size: 0.9em;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 0.5em;
+    color: #dfdfdf;
+    letter-spacing: 0.5px;
+}
+
+
+/* Individual buttons */
+.snippet-toggle {
+    max-width: 250px;
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 0.9em;
+    background-color: transparent;
+    color: #aaa;
+    border: 1px solid #444;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: 'Heebo', sans-serif;
+}
+
+.snippet-toggle:hover {
+    color: #fff;
+    border-color: #666;
+}
+
+.snippet-toggle.active {
+    background-color: #1e90ff;
+    /* bright blue */
+    color: #fff;
+    border-color: #1e90ff;
+}
+
+
+.snippet-group {
+    top: 0;
+    z-index: 50;
+    background: #1c1c1c;
+    padding: 10px;
+    border-radius: 6px 6px 0 0;
+    display: flex; /* enable flexbox */
+    justify-content: center; /* center horizontally */
+    gap: 12px; /* space between buttons */
+}
+
+.snippet-content {
+    margin-top: 0;
+    /* flush under buttons */
+    position: relative;
+    z-index: 1;
+    /* below toolbar */
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+    background: #222;
+    color: #eee;
+    border-radius: 0 0 6px 6px;
+    white-space: pre-wrap;
+    padding: 0;
+
+}
+
+.snippet-content.open {
+    max-height: 600px;
+    padding: 1em;
+    overflow-y: auto;
+    /* scroll inside code */
+    opacity: 1;
+    visibility: visible;
+}
+
+.code-box {
+    position: relative;
+}
+
+.resize-handle {
+
+    cursor: ns-resize;
+    /* up/down resize cursor */
+    pointer-events: auto;
+    opacity: 0.4;
+    z-index: 10;
+
+    /* Button-like styling */
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    width: 100px;
+    height: 30px;
+    margin: 10px auto 0;
+    border-radius: 6px;
+    background-color: #2a2a2a;
+    /* dark modal tone */
+    color: #aaa;
+    font-size: 16px;
+
+    border: 1px solid #444;
+    touch-action: none;
+    user-select: none;
+    transition: all 0.2s ease-in-out;
+
+}
+
+.snippet-content.open + .resize-handle:hover {
+    background-color: #1e90ff;
+    color: #fff;
+    border-color: #1e90ff;
+}
+
+.snippet-content.open + .resize-handle {
+    display: flex;
+    pointer-events: auto;
+    opacity: 1;
+    cursor: ns-resize;
+    color: #fff;
+    background-color: #3a3a3a;
+    border-color: #666;
+}

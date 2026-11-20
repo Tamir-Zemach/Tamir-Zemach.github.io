@@ -1,0 +1,33 @@
+@media screen and (max-width: 517px) {
+
+    #top .row {
+        max-width: 300px;
+    }
+
+    #top .row > .col-9 {
+        margin-top: 0;
+    }
+
+    .row > * {
+        padding: 15px 15px 15px 15px;
+    }
+
+    .about-section {
+        max-width: 400px;
+    }
+
+    .modal-links {
+        gap: 15px !important;
+    }
+    #nav a {
+        font-size: 0.8em;
+        padding: 0 0.5em;  /* tighter spacing */
+    }
+    .box.style1 {
+        max-width: 25em;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+
+}

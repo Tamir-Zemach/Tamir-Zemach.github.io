@@ -1,0 +1,102 @@
+/* assets/css/code-card.css — the game's code card CSS (src/styles/panel.css, verbatim) + classic-site glue (assets/js/code-card.js). */
+/* ---- script code preview (genie flow from the pill, tilted) ---- */
+.sview {
+  width: 680px; cursor: var(--cur-press);
+  border: 52px solid transparent; border-image: url(/ui/panel_bg.png) 120 fill / 52px / 0 stretch;
+  filter: drop-shadow(0 22px 34px rgba(0, 0, 0, .55)) drop-shadow(0 0 26px rgba(168, 128, 255, .3));
+}
+#scriptview { position: fixed; z-index: 141; opacity: 0; pointer-events: none; transform: rotate(var(--tilt, -4deg)); }
+#scriptview.open { opacity: 1; pointer-events: auto; animation: p-cardbob 3s ease-in-out infinite; }
+/* one-shot: plays once right as the card settles, then JS removes the class (see codeCard.ts) so
+   it never replays on later hover in/out — the violet glow blooms outward (blur 0 -> 26px) rather
+   than just fading, reading as the card's aura waking up instead of a flat opacity crossfade */
+#scriptview.open.glow-spawn { animation: p-cardbob 3s ease-in-out infinite, p-glowspawn .5s ease-out; }
+#scriptview.open:hover { animation: p-cardpulse 1.8s ease-in-out infinite; }
+@keyframes p-cardbob {
+  0%, 100% { transform: rotate(var(--tilt, -4deg)) translateY(0); }
+  50% { transform: rotate(var(--tilt, -4deg)) translateY(-9px); }
+}
+@keyframes p-glowspawn {
+  0% { filter: drop-shadow(0 22px 34px rgba(0, 0, 0, .55)) drop-shadow(0 0 0px rgba(168, 128, 255, 0)); }
+  100% { filter: drop-shadow(0 22px 34px rgba(0, 0, 0, .55)) drop-shadow(0 0 26px rgba(168, 128, 255, .3)); }
+}
+@keyframes p-cardpulse {
+  0%, 100% { transform: rotate(var(--tilt, -4deg)) scale(1); filter: drop-shadow(0 22px 34px rgba(0, 0, 0, .55)) drop-shadow(0 0 22px rgba(255, 255, 255, .28)); }
+  50% { transform: rotate(var(--tilt, -4deg)) scale(1.02); filter: drop-shadow(0 22px 34px rgba(0, 0, 0, .55)) drop-shadow(0 0 48px rgba(255, 255, 255, .6)); }
+}
+.sview .sv-bar { display: flex; align-items: center; gap: 7px; padding: 9px 12px; background: rgba(10, 7, 22, .55); border-bottom: 1px solid var(--p-gold-line-soft); }
+.sview .sv-name { font-family: 'Cinzel', serif; font-weight: 700; font-size: 15px; letter-spacing: .7px; color: #fff; margin-left: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sview .sv-x { margin-left: auto; flex: none; width: 20px; height: 20px; border-radius: 50%; border: 0; background: transparent; color: var(--p-ink-faint); font-size: 14px; cursor: var(--cur-press); line-height: 1; }
+.sview .sv-x:hover { color: var(--p-gold); }
+/* fixed (not max-) height so the card is always the same size whether it's mid-fetch (skeleton)
+   or showing real code, and regardless of how long any given snippet happens to be */
+.sview pre { margin: 0; height: min(560px, 68vh); overflow: auto; white-space: pre; scrollbar-width: none; }
+/* still scrolls (wheel / drag), just no visible scrollbar */
+.sview pre::-webkit-scrollbar { display: none; }
+.sview pre code.hljs {
+  display: block; padding: 18px 22px; border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px; line-height: 1.6;
+  background: #0d1117; user-select: none;
+}
+/* shimmering fake code-lines shown while a snippet fetch is still in flight (instead of
+   flashing "Loading…" text); prefetched on pill hover so this rarely shows at all.
+   Same fixed height as pre above (not just padding) — this is what makes the loading card
+   land at its final size instead of growing once the real code swaps in. */
+.sview .sv-skeleton { display: none; height: min(560px, 68vh); padding: 20px 22px; background: #0d1117; border-radius: 6px; overflow: hidden; }
+.sview.loading .sv-skeleton { display: block; }
+.sview.loading pre { display: none; }
+.sview .sv-skeleton i {
+  display: block; height: 14px; margin-bottom: 12px; border-radius: 3px;
+  background: linear-gradient(90deg, #1b2230 25%, #2a3346 50%, #1b2230 75%);
+  background-size: 200% 100%; animation: sv-shimmer 1.3s ease-in-out infinite;
+}
+/* widths cycle every 8 bars — repeats to however many <i> tags fill the fixed height (see codeCard.ts) */
+.sview .sv-skeleton i:nth-child(8n+1) { width: 46%; }
+.sview .sv-skeleton i:nth-child(8n+2) { width: 78%; }
+.sview .sv-skeleton i:nth-child(8n+3) { width: 62%; }
+.sview .sv-skeleton i:nth-child(8n+4) { width: 84%; }
+.sview .sv-skeleton i:nth-child(8n+5) { width: 38%; }
+.sview .sv-skeleton i:nth-child(8n+6) { width: 70%; }
+.sview .sv-skeleton i:nth-child(8n+7) { width: 55%; }
+.sview .sv-skeleton i:nth-child(8n) { width: 30%; }
+.sview .sv-skeleton i:nth-child(2n) { animation-delay: .12s; }
+.sview .sv-skeleton i:nth-child(3n) { animation-delay: .22s; }
+@keyframes sv-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.sview .sv-hint {
+  padding: 11px 12px; border-top: 1px solid var(--p-gold-line-soft);
+  font-family: 'Fauna One', serif; font-size: 16px; letter-spacing: .3px; color: var(--p-ink-faint);
+  text-align: center; display: flex; align-items: center; justify-content: center; gap: 9px;
+}
+.sview .sv-hint .gh { height: 30px; width: 30px; filter: url(#strokeLight) drop-shadow(0 0 3px rgba(220, 228, 250, .7)) drop-shadow(0 0 10px rgba(190, 205, 240, .45)); }
+
+/* ---- genie strips: N horizontal slices that flow from the pill ---- */
+#genieStage { position: fixed; inset: 0; z-index: 140; pointer-events: none; }
+.genie-strip { position: fixed; overflow: hidden; will-change: transform, opacity; transition: transform .44s cubic-bezier(.4, .02, .18, 1), opacity .22s ease; }
+.gcard { position: static; box-shadow: none; backdrop-filter: none; filter: none; pointer-events: none; }
+
+/* classic glue: the card over the modal; the inline code box (snippets.js) is replaced */
+#scriptview { z-index: 10004; } #genieStage { z-index: 10003; }
+body.script-open .game-script .gs-tip { opacity: 0; }
+.sview pre code.hljs { background: #0d1117; }
+/* the site's global button skin drew a pill round the X: reset it to the game's plain X */
+.sview .sv-x { all: unset; margin-left: auto; flex: none; width: 20px; height: 20px; border-radius: 50%; color: var(--p-ink-faint);
+  font-size: 14px; line-height: 20px; text-align: center; cursor: var(--cur-press); box-shadow: none !important; }
+.sview .sv-x:hover { color: var(--p-gold, #f0c15a); }
+/* the site's HUD X (red X on the cream button, = the playable's / panel's X) instead of the plain ✕ */
+.sview .sv-x { width: 34px; height: 34px; border-radius: 0; font-size: 0;
+  background: url(/ui/hud/icon_x.png) center calc(50% - 2px) / 15px no-repeat, url(/ui/hud/button_frame.png) center / 100% 100% no-repeat;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .4)); transition: transform .15s ease; }
+.sview .sv-x:hover { transform: scale(1.08); } .sview .sv-x:active { transform: scale(.92); }
+/* the blue GitHub badge: a baked picture, no light-stroke filter */
+.sview .sv-hint .gh { filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .45)) drop-shadow(0 0 6px rgba(255, 255, 255, .55)) drop-shadow(0 0 14px rgba(255, 255, 255, .3)); } /* soft white glow (his ask 2026-11-18) */
+/* phones: the card fits the screen (52 px frame + 68vh of 14 px code was taller than the phone, 2026-11-18) */
+@media (max-width: 600px), (max-height: 500px) { /* (+ sideways phones: the 414 px tall screen) */
+  .sview { border-width: 30px; border-image-width: 30px; }
+  .sview pre, .sview .sv-skeleton { height: min(420px, 50vh); }
+  .sview pre code.hljs { font-size: 11.5px; line-height: 1.5; padding: 12px 14px; }
+  .sview .sv-bar { padding: 7px 10px; } .sview .sv-name { font-size: 13px; }
+  .sview .sv-hint { font-size: 13px; padding: 8px 10px; } .sview .sv-hint .gh { width: 24px; height: 24px; }
+}

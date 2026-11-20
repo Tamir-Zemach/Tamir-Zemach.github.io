@@ -1,0 +1,488 @@
+/* assets/css/mechanic-anims.css - COPIED from the game's src/styles/panel.css (the mechanic-title hover micro-anims block). Keep in sync with the game; site tweaks go in modal-v2.css. */
+.slabel {
+  text-align: center; color: var(--p-gold); font-weight: 700; font-size: 15px; letter-spacing: 1.5px;
+  text-transform: uppercase; margin: 16px 0 12px; font-family: 'Cinzel', serif;
+}
+
+/* ---- mechanic-title hover micro-anims (fisherman's 3) ---- */
+/* words must be inline-block to accept transforms; each keeps its own pivot */
+.slabel [class^="w-"] { display: inline-block; }
+
+/* Pickup letters cascade one-by-one, THEN Drop fires. All share the same 2.6s period,
+   so the per-element animation-delay keeps the sequence locked on every loop.
+   transitions let JS ease the words back to rest on mouse-leave (instead of snapping) */
+.anim-pickupdrop .w-pickup .ch { display: inline-block; transform-origin: center bottom; transition: transform .38s ease; }
+.anim-pickupdrop .w-drop { transform-origin: right top; transition: transform .38s ease, opacity .38s ease; }
+.anim-pickupdrop.playing .w-pickup .ch { animation: letterFloat 2.6s ease-in-out infinite; }
+.anim-pickupdrop.playing .w-drop { animation: dropSeq 2.6s ease-in-out infinite; animation-delay: 1.1s; }
+@keyframes letterFloat { /* anticipation dip, float up + slight tilt, settle, then rest */
+  0% { transform: translateY(0) rotate(0deg); }
+  4% { transform: translateY(4px) rotate(3deg); }
+  13% { transform: translateY(-13px) rotate(-7deg); }
+  20% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+/* swing decelerates (ease-out) up to the hang, then the fall accelerates (ease-in) = fast fall */
+@keyframes dropSeq { /* dangle off the top-right nail: swing up-right w/ overshoot, back down-left, then fall far (behind video), reset invisibly */
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; animation-timing-function: ease-out; }
+  9% { transform: translateY(0) rotate(-120deg); opacity: 1; animation-timing-function: ease-in-out; }
+  16% { transform: translateY(0) rotate(-60deg); opacity: 1; animation-timing-function: ease-out; }
+  21% { transform: translateY(0) rotate(-90deg); opacity: 1; animation-timing-function: ease-in; }
+  27% { transform: translateY(120px) rotate(30deg); opacity: 1; animation-timing-function: ease-in; }
+  35% { transform: translateY(340px) rotate(58deg); opacity: 1; }
+  39% { transform: translateY(340px) rotate(58deg); opacity: 0; }
+  50% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  56% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(0) rotate(0deg); opacity: 1; }
+}
+
+/* Full Gameplay Footage: words grow one-by-one (stay grown); once ALL are grown the letters
+   turn white one at a time L→R; sparkles keep spawning slowly and PERSIST; then all shrink
+   together (letters revert, sparkles fade out). Orchestrated in JS (mechanicAnims.ts). */
+.anim-fullshine .w-sh { position: relative; display: inline-block; transition: transform .2s cubic-bezier(.34, 1.56, .64, 1); }
+.anim-fullshine .w-sh.grown { transform: scale(1.16); }
+.anim-fullshine .w-sh:first-child.grown { transform: translateX(-12px) scale(1.16); }
+.anim-fullshine .w-sh:last-child.grown { transform: translateX(12px) scale(1.16); }
+.anim-fullshine .ch { position: relative; display: inline-block; transition: color .13s ease, text-shadow .13s ease; }
+.anim-fullshine .ch.lit { color: #fff; text-shadow: 0 0 12px rgba(255, 235, 180, .85), 0 0 4px rgba(255, 240, 200, .95); }
+.anim-fullshine .spark {
+  position: absolute; pointer-events: none; z-index: 2;
+  background: url(/ui/sparkle.svg) center/contain no-repeat;
+  filter: drop-shadow(0 0 4px rgba(255, 240, 200, .9));
+  animation: sparkTwinkle var(--life, 900ms) ease-in-out forwards;
+}
+@keyframes sparkTwinkle {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0) rotate(var(--r0, 0deg)); }
+  40% { opacity: 1; transform: translate(-50%, -50%) scale(1.1) rotate(var(--r1, 90deg)); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(.2) rotate(var(--r2, 180deg)); }
+}
+
+/* Color Reactive Wall: two lanterns fade in above + descend to the title, switch ON, then the
+   letters dissolve (taking the warm lamp color) and re-materialize on a loop. */
+.anim-crw { display: flex; align-items: center; justify-content: center; gap: 16px; }
+.anim-crw .lamp {
+  width: 46px; height: 46px; flex: none; position: relative;
+  background: url(/ui/lantern_off.png) center/contain no-repeat;
+  opacity: 0; transform: translateY(-40px);
+  transition: opacity .5s ease, transform .6s cubic-bezier(.22, 1, .36, 1), filter .35s ease;
+}
+.anim-crw .lamp::after {
+  content: ''; position: absolute; inset: 0;
+  background: url(/ui/lantern_on.png) center/contain no-repeat; opacity: 0; transition: opacity .35s ease;
+}
+.anim-crw.go .lamp { opacity: 1; transform: translateY(0); }
+.anim-crw.lit .lamp::after { opacity: 1; }
+.anim-crw.lit .lamp { filter: drop-shadow(0 0 9px rgba(255, 205, 110, .85)) drop-shadow(0 0 20px rgba(255, 175, 80, .5)); }
+/* soft light ray fanning down from each lamp; fades in with the lit state + gentle flicker */
+.anim-crw .lamp::before {
+  content: ''; position: absolute; left: 50%; top: 56%; width: 80px; height: 160px;
+  margin-left: -40px; transform-origin: 50% 0; pointer-events: none; mix-blend-mode: screen; opacity: 0;
+  background: linear-gradient(to bottom, rgba(255, 214, 140, .6), rgba(255, 190, 90, .14) 55%, transparent 85%);
+  clip-path: polygon(34% 0%, 66% 0%, 100% 100%, 0% 100%); filter: blur(7px);
+  transition: opacity .5s ease;
+}
+.anim-crw .lamp:first-child::before { transform: rotate(-90deg); }
+.anim-crw .lamp:last-child::before { transform: rotate(90deg); }
+.anim-crw.lit .lamp::before { opacity: .85; animation: rayFlicker 3.2s ease-in-out infinite; }
+@keyframes rayFlicker { 0%, 100% { opacity: .66; } 50% { opacity: .92; } }
+.anim-crw .crw-text .ch {
+  display: inline-block; color: var(--p-gold);
+  transition: opacity .42s ease, filter .42s ease, transform .42s ease, color .42s ease;
+}
+.anim-crw .crw-text .ch.gone {
+  opacity: 0; filter: blur(7px);
+  transform: translateY(var(--dy, -12px)) scale(1.25); color: #ffc25a;
+}
+
+/* ---- Upgrade Popup: a real slot reel (mirrors Apollo T6046) — each letter/word is a vertical reel
+   of random glyphs scrolling down with a vertical motion blur, stopping staggered L→R with a snap +
+   flash (the randomized upgrade slots settling). JS-driven per frame (mechanicAnims.ts). ---- */
+.anim-uppop .ch {
+  display: inline-block; vertical-align: middle; text-align: center;
+  height: 1.15em; line-height: 1.15em; overflow: hidden; position: relative;
+}
+.anim-uppop .ch .reel { display: block; transform: translateY(-50%); } /* two stacked rows; at rest shows the bottom (real) row */
+.anim-uppop .ch .reel span { display: block; height: 1.15em; line-height: 1.15em; }
+.anim-uppop .ch.spinning { filter: url(#reelBlur); } /* vertical motion blur while spinning */
+.anim-uppop .ch.pulse { animation: uplock .3s ease-out; } /* locks in: snap + white flash → gold */
+@keyframes uplock {
+  0% { transform: scale(.82); color: #fff; text-shadow: 0 0 15px rgba(255, 235, 170, .95), 0 0 6px rgba(255, 245, 210, .9); }
+  60% { transform: scale(1.07); }
+  100% { transform: scale(1); color: var(--p-gold); text-shadow: none; }
+}
+.anim-uppop.finish { animation: upfinish .5s cubic-bezier(.2, .8, .3, 1); } /* whole-title pulse once all reels lock */
+@keyframes upfinish {
+  0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(255, 215, 120, 0)); }
+  30% { transform: scale(1.07); filter: drop-shadow(0 0 11px rgba(255, 215, 120, .6)); }
+  100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(255, 215, 120, 0)); }
+}
+
+/* ---- Unit Spawner: units queue on the video surface (low + left), then walk right in small hops
+   one by one until roughly under their home position, then jump straight up into place with a pulse.
+   Hold, then walk back to the queue. Motion is driven per-letter in JS (Web Animations API). ---- */
+.anim-spawn { position: relative; z-index: 5; } /* letters ride over the video surface */
+.anim-spawn .ch { display: inline-block; } /* transform has no effect on non-replaced inline boxes without this */
+
+/* ---- Money Flash: on hover the title shakes and an endless fountain of coins + dollars sprays up
+   from it and arcs back down under gravity. JS-driven particle physics; art in public/ui. ---- */
+.anim-moneyflash { transition: transform .25s ease; } /* eases the shake back to rest on stop (no hard snap) */
+.anim-moneyflash.shaking { animation: moneyshake .16s linear infinite; }
+@keyframes moneyshake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-2px, 1px); }
+  40% { transform: translate(2px, -1px); }
+  60% { transform: translate(-1px, -1.5px); }
+  80% { transform: translate(1px, 1px); }
+}
+.mf-particle {
+  position: fixed; left: 0; top: 0; pointer-events: none; z-index: 160; will-change: transform;
+  height: auto; transform-origin: center; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .35));
+}
+.anim-moneyflash .ch { display: inline-block; transition: color .25s ease; }
+/* alternating money colors, only while animating; the whole title toggles g↔y in sync (.swap) */
+.anim-moneyflash.shaking .ch.g,
+.anim-moneyflash.shaking.swap .ch.y { color: #5fd06a; }
+.anim-moneyflash.shaking .ch.y,
+.anim-moneyflash.shaking.swap .ch.g { color: #ffe24a; }
+
+/* ---- Dash Drill: real drill sprite sheet (9 frames), hover-triggered sequence ----
+   rest: drill hidden behind the centered title. hover: drill mask-reveals DOWN from under the
+   middle of the title (spinning throughout), then title+drill anticipate up + plunge fast into
+   the video, HOLD there drilling ~2s spraying gray dust, retract, loop. mouseleave eases back.
+   NOTE: the moving part is .drillrig; .drilltitle stays put so it stays the hover target even as
+   the drill plunges away — otherwise the cursor falls off and mouseleave resets the anim. */
+.drilltitle { position: relative; z-index: 4; text-align: center; --drill-top: 68%; } /* --drill-top = drill's resting vertical position under the title */
+.drillrig { position: relative; display: inline-block; transition: transform .34s cubic-bezier(.2, .7, .2, 1); }
+.drillshaker { position: relative; display: inline-block; } /* separate layer so the drilling shake composes with the rig's plunge */
+.drilltitle.drilling .drillshaker { animation: drillshake .1s ease-in-out infinite; }
+@keyframes drillshake {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-1.2px, 1px); }
+  50% { transform: translate(1.2px, -1px); }
+  75% { transform: translate(-1px, -1.2px); }
+  100% { transform: translate(0, 0); }
+}
+.dtext { position: relative; z-index: 2; } /* title stays centered, on top */
+.drill {
+  position: absolute; z-index: 1; left: 50%; top: var(--drill-top); transform: translateX(-50%); /* centered; vertical pos = --drill-top */
+  width: 30px; height: 31px; overflow: hidden; /* clip window = one frame (smaller) */
+  -webkit-mask: linear-gradient(#000, #000) top/100% 0% no-repeat; /* hidden at rest, reveals downward */
+  mask: linear-gradient(#000, #000) top/100% 0% no-repeat;
+  transition: -webkit-mask-size .3s ease, mask-size .3s ease;
+}
+.drill .drill-strip { height: 31px; width: 270px; max-width: none; display: block; transform: translateX(0); }
+/* order on hover: the rig ANTICIPATES first, THEN the drill reveals + spins (both delayed .35s) */
+.drilltitle.playing .drill .drill-strip { animation: drillspin .5s .35s steps(9) infinite; }
+.drilltitle.playing .drill { animation: drillreveal .32s .35s ease-out forwards; }
+.drilltitle.playing .drillrig { animation: drillplunge 3.5s infinite; }
+@keyframes drillspin { from { transform: translateX(0); } to { transform: translateX(-270px); } }
+@keyframes drillreveal {
+  from { -webkit-mask-size: 100% 0%; mask-size: 100% 0%; }
+  to { -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
+}
+@keyframes drillplunge {
+  0% { transform: translateY(0); animation-timing-function: ease-out; }
+  13% { transform: translateY(-16px); animation-timing-function: ease-in-out; } /* anticipation — title lifts higher, FIRST */
+  27% { transform: translateY(-16px); animation-timing-function: cubic-bezier(.6, 0, .9, .12); } /* hold lifted during reveal, then SNAP down */
+  30% { transform: translateY(var(--plunge, 30px)); animation-timing-function: ease-out; } /* fast + sharp plunge onto the video's top surface */
+  90% { transform: translateY(var(--plunge, 30px)); animation-timing-function: ease-in-out; } /* HOLD ~2s, drilling */
+  100% { transform: translateY(0); } /* retract, loop */
+}
+/* gray drill dust — spawned in JS at the tip on each impact */
+.drill-particle {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 160; opacity: 0;
+  background: radial-gradient(circle at 35% 30%, #cfcfcf, #7f7f7f 68%, #565656);
+  animation: drillDust var(--life, 650ms) ease-out forwards;
+}
+@keyframes drillDust {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  70% { opacity: .9; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px))) scale(.35); }
+}
+
+/* ---- Camera Transition: viewfinder rack-focus. hover: 4 focus brackets fly into the title's
+   corners, the text snaps blurred→sharp (autofocus lock) with a punch-in + shake (impact),
+   holds framed, then defocuses + brackets fly out. loops. mouseleave eases back to the plain title.
+   --cyc = full cycle. three synced animations on separate elements so transforms/filters don't clash. */
+.camtitle { --cyc: 2.6s; text-align: center; }
+.camframe { position: relative; display: inline-block; transition: transform .25s ease; } /* wraps the text tightly; holds the brackets */
+.camtext { display: inline-block; transition: filter .25s ease, opacity .25s ease; } /* rack-focus blur target */
+.vf {
+  position: absolute; width: 13px; height: 13px; border: 2px solid rgba(255, 255, 255, .92);
+  opacity: 0; pointer-events: none; filter: drop-shadow(0 0 3px rgba(255, 255, 255, .5));
+  transform: translate(var(--ox, 0), var(--oy, 0)); transition: opacity .25s ease, transform .25s ease;
+}
+.vf.tl { top: -9px; left: -11px; border-right: 0; border-bottom: 0; --ox: -12px; --oy: -12px; }
+.vf.tr { top: -9px; right: -11px; border-left: 0; border-bottom: 0; --ox: 12px; --oy: -12px; }
+.vf.bl { bottom: -9px; left: -11px; border-right: 0; border-top: 0; --ox: -12px; --oy: 12px; }
+.vf.br { bottom: -9px; right: -11px; border-left: 0; border-top: 0; --ox: 12px; --oy: 12px; }
+.camtitle.playing .vf { animation: vfframe var(--cyc) ease-in-out infinite; }
+.camtitle.playing .camtext { animation: rackfocus var(--cyc) ease-in-out infinite; }
+.camtitle.playing .camframe { animation: camlock var(--cyc) ease-in-out infinite; }
+@keyframes vfframe { /* fly in → SEARCH (hunt in/out) → lock to corners → hold → fly out */
+  0% { opacity: 0; transform: translate(var(--ox), var(--oy)); }
+  10% { opacity: 1; transform: translate(calc(var(--ox) * 0.32), calc(var(--oy) * 0.32)); }
+  18% { transform: translate(calc(var(--ox) * 0.10), calc(var(--oy) * 0.10)); }
+  26% { transform: translate(calc(var(--ox) * 0.30), calc(var(--oy) * 0.30)); }
+  34% { transform: translate(calc(var(--ox) * 0.12), calc(var(--oy) * 0.12)); }
+  40% { transform: translate(calc(var(--ox) * 0.22), calc(var(--oy) * 0.22)); }
+  46% { opacity: 1; transform: translate(0, 0); } /* LOCK to the corners */
+  80% { opacity: 1; transform: translate(0, 0); }
+  92% { opacity: 0; transform: translate(var(--ox), var(--oy)); }
+  100% { opacity: 0; transform: translate(var(--ox), var(--oy)); }
+}
+@keyframes rackfocus { /* blur PULSES during the search, then SNAPS sharp on lock */
+  0% { filter: blur(4px); opacity: .7; }
+  10% { filter: blur(3.5px); opacity: .78; }
+  18% { filter: blur(2.2px); opacity: .86; }
+  26% { filter: blur(4px); opacity: .72; }
+  34% { filter: blur(2.4px); opacity: .86; }
+  40% { filter: blur(3.4px); opacity: .78; animation-timing-function: ease-in; }
+  46% { filter: blur(0); opacity: 1; } /* SNAP sharp (lock) */
+  80% { filter: blur(0); opacity: 1; animation-timing-function: ease-in; }
+  92% { filter: blur(3px); opacity: .75; }
+  100% { filter: blur(4px); opacity: .7; }
+}
+@keyframes camlock { /* stays wide during the search → punch-in on lock → settle → drift wide */
+  0% { transform: scale(1.06); }
+  40% { transform: scale(1.06); animation-timing-function: ease-in; }
+  46% { transform: scale(.975); } /* punch-in overshoot on lock */
+  52% { transform: scale(1); } /* settle */
+  80% { transform: scale(1); animation-timing-function: ease-in-out; }
+  100% { transform: scale(1.06); }
+}
+
+/* ---- Ragdoll: the whole title vibrates (escalating), then every letter BURSTS outward + up,
+   gravity drags each down onto the video's top edge where it bounces + settles, then respawns.
+   --land (fall distance to the frame's top ledge) is measured per-letter in JS on hover. ---- */
+.anim-ragdoll .ch { display: inline-block; transform-origin: center; transition: transform .3s ease, opacity .3s ease; }
+.anim-ragdoll.playing { animation: ragshake 3s ease-in-out infinite; }
+.anim-ragdoll.playing .ch { animation: ragburst 3s infinite; }
+@keyframes ragshake { /* whole title jitters, escalating, then releases at 12% */
+  0% { transform: translate(0, 0); }
+  2% { transform: translate(-2px, 1px); }
+  4% { transform: translate(2px, -1px); }
+  6% { transform: translate(-3px, 1px); }
+  8% { transform: translate(3px, -1px); }
+  10% { transform: translate(-4px, 1px); }
+  11% { transform: translate(4px, 0); }
+  12% { transform: translate(0, 0); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes ragburst {
+  0%, 12% { transform: translate(0, 0) rotate(0); opacity: 1; animation-timing-function: cubic-bezier(.1, .82, .26, 1); }
+  22% { transform: translate(calc(var(--bx, 0px) * .8), var(--by, -26px)) rotate(calc(var(--rr, 540deg) * .4)); animation-timing-function: cubic-bezier(.64, 0, .9, .32); }
+  37% { transform: translate(var(--bx, 0px), var(--land, 120px)) rotate(var(--rr, 540deg)); animation-timing-function: cubic-bezier(.2, .7, .3, 1); }
+  45% { transform: translate(var(--bx, 0px), calc(var(--land, 120px) - var(--b1, 28px))) rotate(calc(var(--rr, 540deg) + 8deg)); animation-timing-function: cubic-bezier(.55, 0, .9, .45); }
+  51% { transform: translate(var(--bx, 0px), var(--land, 120px)) rotate(var(--rr, 540deg)); animation-timing-function: cubic-bezier(.2, .7, .3, 1); }
+  56% { transform: translate(var(--bx, 0px), calc(var(--land, 120px) - var(--b2, 10px))) rotate(var(--rr, 540deg)); animation-timing-function: cubic-bezier(.55, 0, .9, .45); }
+  60% { transform: translate(var(--bx, 0px), var(--land, 120px)) rotate(var(--rr, 540deg)); animation-timing-function: cubic-bezier(.15, .85, .35, 1); }
+  74%, 80% { transform: translate(calc(var(--bx, 0px) + var(--roll, 10px)), var(--land, 120px)) rotate(calc(var(--rr, 540deg) + var(--rr2, 30deg))); opacity: 1; }
+  86% { opacity: 0; }
+  87% { transform: translate(0, 0) rotate(0); opacity: 0; }
+  94% { transform: translate(0, 0) rotate(0); opacity: 1; }
+  100% { transform: translate(0, 0) rotate(0); opacity: 1; }
+}
+
+/* ---- Static Turret: at rest the can is hidden and the title sits centered (like Dash Drill).
+   On hover the water-can enemy sprite flies in from the RIGHT, plays its 5-frame shooting sheet
+   and sprays LEFTWARD across the word — nozzle flash + water tracers. The letters get hit one by
+   one, right→left, each doing a shake + red flash. Then the can flies back out. Loops while
+   hovered. Can is absolutely positioned so the title stays centered; anchored + measured in JS. ---- */
+.anim-turret { position: relative; } /* title stays centered; can overlays */
+.turgun {
+  position: absolute; top: 50%; width: 31px; height: 44px; overflow: hidden; /* one-frame clip window */
+  opacity: 0; transform: translate(60px, -50%) rotate(-90deg); /* hidden, off right, tipped left (spout aims at the word) */
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, .4)); pointer-events: none;
+  transition: transform .42s cubic-bezier(.2, .7, .3, 1), opacity .3s ease;
+}
+.turgun.in { opacity: 1; transform: translate(0, -50%) rotate(-90deg); } /* flown in to its anchor */
+.turgun-strip { display: block; height: 44px; width: 155px; max-width: none; transform: translateX(0); }
+.turgun.play .turgun-strip { animation: turgun-spin .5s steps(5) infinite; } /* shooting cycle */
+@keyframes turgun-spin { from { transform: translateX(0); } to { transform: translateX(-155px); } }
+
+.anim-turret .ch { display: inline-block; position: relative; transition: color .18s ease, text-shadow .18s ease; }
+.anim-turret .ch.hit {
+  color: #ff5a4d; text-shadow: 0 0 12px rgba(255, 70, 60, .85); /* shot lands: shake + red */
+  animation: turchhit .34s ease-out;
+}
+@keyframes turchhit {
+  0% { transform: translate(0, 0); }
+  15% { transform: translate(2px, -2px); }
+  30% { transform: translate(-3px, 2px); }
+  45% { transform: translate(3px, 1px); }
+  60% { transform: translate(-2px, -1px); }
+  100% { transform: translate(0, 0); }
+}
+.anim-turret .ch.dead { animation: turfall .45s cubic-bezier(.4, 0, .7, .5) forwards; } /* hurt done: fade to gray + fall */
+@keyframes turfall {
+  0% { color: #ff5a4d; opacity: 1; transform: translate(0, 0) rotate(0); }
+  100% { color: #8a8a8a; opacity: 0; transform: translate(var(--dx, 0px), var(--dy, 46px)) rotate(var(--dr, 22deg)); }
+}
+/* nozzle flash + water tracer — spawned at the can's (left-facing) nozzle, streaking LEFT */
+.tur-flash {
+  position: fixed; pointer-events: none; z-index: 160; width: 20px; height: 20px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, #fff 0%, #bfe9ff 34%, rgba(90, 180, 255, .5) 60%, transparent 72%);
+  animation: turFlash 200ms ease-out forwards;
+}
+@keyframes turFlash {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.3); }
+  22% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(.7); }
+}
+.tur-bullet {
+  position: fixed; pointer-events: none; z-index: 159; height: 3px; width: 28px;
+  transform-origin: left center; /* travel driven per-bullet via WAAPI in JS */
+  background: linear-gradient(90deg, rgba(200, 235, 255, .95), rgba(90, 170, 255, 0)); /* bright at the LEADING edge */
+  filter: drop-shadow(0 0 4px rgba(120, 190, 255, .85));
+}
+/* blue water impact particles — 3–5 spawned at the letter on hit */
+.tur-particle {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 160; opacity: 0;
+  background: radial-gradient(circle at 35% 30%, #dff2ff, #6fb8ff 65%, #2f7fe0);
+  filter: drop-shadow(0 0 3px rgba(120, 190, 255, .7));
+  animation: turDust var(--life, 600ms) ease-out forwards;
+}
+@keyframes turDust {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  70% { opacity: .9; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px))) scale(.35); }
+}
+
+/* ---- Object Pooling: pool always holds a fixed number of letters — each swap tick revives
+   one pooled letter and flies a different active one into the bin in its place (JS-driven
+   WAAPI flight, mechanicAnims.ts). .op-wrap shrink-wraps to the TEXT only (inline-block) so
+   the bin — position:absolute, hangs off its right edge — never widens the box .slabel's
+   text-align:center uses to center it; without this the bin's own width would drag the whole
+   title visibly off-center (real bug, caught 2026-09-06). ---- */
+.anim-objectpool .op-wrap { position: relative; display: inline-block; }
+.anim-objectpool .op-text .ch { display: inline-block; position: relative; z-index: 1; transition: opacity .15s ease, color .15s ease; }
+.anim-objectpool .op-text .ch.pooled { opacity: .55; color: #9a8a6a; }
+/* Bin is a real SVG, not a flat icon: the body path is stroke-only (fill:none), so pooled
+   letters orbiting inside it show through the hollow center; the lid is a separate <g> with
+   its own transform-origin so it can tilt open independently on every letter transit. */
+.anim-objectpool .op-bin-svg {
+  position: absolute; left: 100%; top: 50%; margin-left: 14px; z-index: 2;
+  width: 30px; height: 30px; flex: none; overflow: visible;
+  opacity: 0; transform: translateY(-50%) scale(.8); transition: opacity .3s ease, transform .3s ease;
+}
+.anim-objectpool.playing .op-bin-svg { opacity: .9; transform: translateY(-50%) scale(1); }
+.anim-objectpool .op-bin-svg.pulse { animation: poolpulse .2s ease-out; }
+.anim-objectpool .op-bin-body { fill: none; stroke: var(--p-gold); stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+.anim-objectpool .op-bin-lid {
+  fill: var(--p-gold); transform-origin: 23px 10px;
+  transition: transform .14s cubic-bezier(.34, 1.56, .64, 1);
+}
+.anim-objectpool .op-bin-lid.open { transform: rotate(32deg) translate(1px, -2px); }
+@keyframes poolpulse {
+  0% { filter: drop-shadow(0 0 0 rgba(255, 215, 120, 0)); transform: translateY(-50%) scale(1); }
+  40% { filter: drop-shadow(0 0 8px rgba(255, 215, 120, .9)); transform: translateY(-50%) scale(1.15); }
+  100% { filter: drop-shadow(0 0 0 rgba(255, 215, 120, 0)); transform: translateY(-50%) scale(1); }
+}
+
+/* ---- VFX: 3-beat loop mirroring the mechanic's own effect categories — telegraph ring pulses,
+   impact burst (flash + kick + shockwave), settle into ambient smoke. .vfx-wrap shrink-wraps to
+   the TEXT only so the rings size to the word, not the full centered title box (same
+   centering-safety pattern as objectpool's .op-wrap). ---- */
+.anim-vfx .vfx-wrap { position: relative; display: inline-block; }
+.anim-vfx .vfx-text .ch { display: inline-block; transition: color .15s ease, text-shadow .15s ease, transform .3s cubic-bezier(.34, 1.56, .64, 1); }
+.anim-vfx .vfx-text .ch.impact {
+  animation: vfxImpactChar .5s cubic-bezier(.2, .8, .3, 1);
+}
+@keyframes vfxImpactChar {
+  0% { color: #fff; text-shadow: 0 0 16px rgba(255, 245, 210, .95), 0 0 6px #fff; transform: translate(var(--kx, 0), var(--ky, 0)) scale(1.18); }
+  100% { color: var(--p-gold); text-shadow: none; transform: translate(0, 0) scale(1); }
+}
+/* Ring/burst is a real generated texture (public/ui/vfx_ring.png — a soft glowing gold
+   annulus with faint outward streaks), not a plain CSS border-circle: telegraph and shockwave
+   just reuse it at different scale/opacity/brightness rather than drawing two shapes. */
+.anim-vfx .vfx-ring {
+  position: absolute; inset: -14px -22px; pointer-events: none; opacity: 0;
+  /* stretch (not contain) — the label's box is wide+short, same squash a border-radius:50%
+     ellipse on a rectangular box would get; a uniform-fit ring would just look tiny inside it */
+  background: url(/ui/vfx_ring.png) center / 100% 100% no-repeat;
+}
+.anim-vfx .vfx-telegraph.go { animation: vfxTelegraph .7s ease-out 2; }
+@keyframes vfxTelegraph {
+  0% { transform: scale(.68); opacity: 0; filter: brightness(1); }
+  55% { opacity: .75; }
+  100% { transform: scale(1.05); opacity: 0; }
+}
+.anim-vfx .vfx-shock.go { animation: vfxShock .45s cubic-bezier(.15, .7, .3, 1); }
+@keyframes vfxShock {
+  0% { transform: scale(.5); opacity: 1; filter: brightness(1.6); }
+  100% { transform: scale(1.7); opacity: 0; filter: brightness(1); }
+}
+/* ambient smoke: a real generated wisp texture (public/ui/vfx_smoke.png), not a CSS
+   radial-gradient blob — fixed-position puffs spawned at the title's own screen rect (JS,
+   mechanicAnims.ts), same fixed-position particle pattern moneyflash/turret already use */
+.vfx-smoke {
+  position: fixed; pointer-events: none; z-index: 160;
+  background: url(/ui/vfx_smoke.png) center/contain no-repeat;
+  animation: vfxSmokeRise var(--life, 1100ms) ease-out forwards;
+}
+@keyframes vfxSmokeRise {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.4); }
+  25% { opacity: .8; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx, 0px)), -140%) scale(1.6); }
+}
+
+/* ---- Parallax Effect: mirrors the real VFX-showreel burst — a grouped circular shake + brief
+   pull-in squeeze, then each letter flies out along its own radial "spoke" direction (fast
+   burst easing into a long slow crawl), then a hard accelerating pull sucks every letter back
+   to center — looping for as long as it's hovered. Per-letter radial direction (--rx/--ry) is
+   set once in mountParallax() (mechanicAnims.ts), evenly spaced around a circle with slight
+   per-letter jitter so it reads as spokes, not randomness. The group shake (.pl-group) and the
+   per-letter burst (.ch) are two independent animations on nested elements — their transforms
+   compose naturally, so the shake nudges the whole title while each letter still flies its own
+   direction on top of that. On mouse-leave, removing .playing stops both keyframe animations
+   and their computed transform reverts to the un-animated base (none) — the transition below
+   picks that reversion up and eases it, instead of a hard snap (same technique .anim-ragdoll
+   already uses). ---- */
+.anim-parallax .pl-group { display: inline-block; transition: transform .3s ease; }
+.anim-parallax.playing .pl-group { animation: plGroupShake 3.2s ease-in-out infinite; }
+@keyframes plGroupShake {
+  0%   { transform: translate(0, 0) rotate(0deg) scale(1); }
+  1.5% { transform: translate(-2px, 1px) rotate(-1.2deg) scale(1); }
+  3%   { transform: translate(2px, -1px) rotate(1.2deg) scale(1); }
+  4.5% { transform: translate(-1.5px, 1.5px) rotate(-.6deg) scale(1); }
+  6%   { transform: translate(0, 0) rotate(0deg) scale(1); }
+  9%   { transform: scale(.9); }
+  12%, 100% { transform: scale(1); }
+}
+.anim-parallax .ch { display: inline-block; transition: transform .3s ease; }
+.anim-parallax.playing .ch { animation: plBurst 3.2s infinite; }
+@keyframes plBurst {
+  0%   { transform: translate(0, 0); }
+  11%  { transform: translate(0, 0); animation-timing-function: cubic-bezier(.12, .85, .32, 1); }
+  44%  { transform: translate(calc(var(--rx) * .92), calc(var(--ry) * .92)); animation-timing-function: cubic-bezier(.35, 0, .55, .25); }
+  80%  { transform: translate(var(--rx), var(--ry)); animation-timing-function: cubic-bezier(.7, 0, .86, 0); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ---- Polarity Switch: idle title is plain (matches every other mechanic label — no color,
+   no glow). On hover, a diagonal line sweeps left-to-right across the title, flipping letters
+   from blue to green; when that pass finishes, ANOTHER pass immediately sweeps the other way
+   color-wise (green back to blue), ping-ponging for as long as it's hovered — never a hard cut
+   back to the start color. On leave, the in-flight pass reverses in place back to its own start
+   color, then the whole colored layer fades out, revealing the plain resting title underneath.
+   .pol-normal (plain, in normal flow) sets the layout size AND is the idle/rest look;
+   .pol-wrap (absolute, opacity-toggled) holds .pol-base + .pol-sweep, whose colors are set
+   inline per pass by mountPolarity() (mechanicAnims.ts) — not fixed in CSS, since which one is
+   blue vs green flips every pass. Driven via the Web Animations API, not a CSS @keyframes loop.
+   .pol-stack stays a plain inline-block sized to the text so the outer .slabel's own
+   text-align:center still centers it (an earlier version put display:inline-block directly on
+   .anim-polarity, which broke that centering). ---- */
+.anim-polarity .pol-stack { position: relative; display: inline-block; }
+.anim-polarity .pol-wrap { position: absolute; inset: 0; opacity: 0; transition: opacity .22s ease; }
+.anim-polarity .pol-wrap.pol-show { opacity: 1; }
+.anim-polarity .pol-sweep {
+  position: absolute; inset: 0;
+  /* Static resting clip = the "hidden" keyframe mountPolarity() animates from/back to. Needed
+     as a real fallback, not just the animation's start value: Chrome auto-removes a finished,
+     unreferenced WAAPI animation from the effect stack, and without this base rule the element
+     would revert to clip-path:none (fully unclipped) the moment that happens. */
+  clip-path: polygon(-60% -20%, -30% -20%, -50% 120%, -60% 120%);
+}
+

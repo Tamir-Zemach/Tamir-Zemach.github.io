@@ -1,0 +1,28 @@
+[
+  {
+    "title": "Pickup & Drop",
+    "video": "/media/fisherman/pickup-drop.mp4",
+    "text": "<strong>Spot it, grab it, carry it, drop it.</strong> Highlights and camera nudges included.",
+    "snippets": [
+      {
+        "title": "PlayerPickupController.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/A-Fishermans-Memories/refs/heads/main/Assets/Scripts/Player/PlayerPickupController.cs"
+      },
+      {
+        "title": "CheckForPickables.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/A-Fishermans-Memories/refs/heads/main/Assets/Scripts/Player/CheckForPickables.cs"
+      }
+    ]
+  },
+  {
+    "title": "Color Reactive Wall",
+    "video": "/media/fisherman/color-reactive-wall.mp4",
+    "text": "A <strong>dynamic barrier</strong> that materializes or dissolves based on specific <strong>lantern color combinations</strong>.",
+    "snippets": [
+      {
+        "title": "ColorReactiveWall.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/A-Fishermans-Memories/refs/heads/main/Assets/Scripts/Walls/ColorReactiveWall.cs"
+      }
+    ]
+  }
+]

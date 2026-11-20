@@ -1,0 +1,63 @@
+[
+  {
+    "title": "Upgrade Popup",
+    "video": "/media/cota/upgrade-popup.mp4",
+    "text": "A <strong>rules engine</strong> in a popup: random odds, upgrade limits, all <strong>tunable by designers</strong>, no code.",
+    "snippets": [
+      {
+        "title": "UpgradePopup.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/Age-Of-War-Code-Project/refs/heads/main/Assets/Scripts/Ui/Buttons/Upgrade%20Popup/UpgradePopup.cs"
+      },
+      {
+        "title": "UpgradePopupConfiguration.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/Age-Of-War-Code-Project/refs/heads/main/Assets/Scripts/Configuration/UpgradePopupConfiguration.cs"
+      },
+      {
+        "title": "UpgradeEligibilityChecker.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/Age-Of-War-Code-Project/refs/heads/main/Assets/Scripts/BackEnd/Utilities/PopupUtil/UpgradeEligibilityChecker.cs"
+      }
+    ]
+  },
+  {
+    "title": "Unit Spawner",
+    "video": "/media/cota/unit-spawner.mp4",
+    "text": "<strong>Queue, pay, spawn.</strong> One pipeline ties the <strong>UI</strong>, the <strong>economy</strong> and the <strong>battlefield</strong> together.",
+    "snippets": [
+      {
+        "title": "UnitSpawner.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/Age-Of-War-Code-Project/refs/heads/main/Assets/Scripts/Managers/Spawners/UnitSpawner.cs"
+      },
+      {
+        "title": "UnitDeploymentQueue.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/Age-Of-War-Code-Project/refs/heads/main/Assets/Scripts/Managers/Spawners/UnitDeploymentQueue.cs"
+      },
+      {
+        "title": "UnitDeployButton.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/Age-Of-War-Code-Project/refs/heads/main/Assets/Scripts/Ui/Buttons/Deploy%20Button/UnitDeployButton.cs"
+      },
+      {
+        "title": "Deployment.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/Age-Of-War-Code-Project/refs/heads/main/Assets/Scripts/BackEnd/Structs/Deployment.cs"
+      }
+    ]
+  },
+  {
+    "title": "Money Flash",
+    "video": "/media/cota/money-flash.mp4",
+    "text": "One <strong>static effects library</strong>: flashes, shakes and rising numbers for <strong>any UI element</strong>.",
+    "snippets": [
+      {
+        "title": "MoneyTextUiDisplay.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/Age-Of-War-Code-Project/refs/heads/main/Assets/Scripts/Ui/Text%20Display/MoneyTextUiDisplay.cs"
+      },
+      {
+        "title": "UIEffects.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/Age-Of-War-Code-Project/refs/heads/main/Assets/Scripts/BackEnd/Utilities/EffectsUtil/UIEffects.cs"
+      },
+      {
+        "title": "NumberRisingUtil.cs",
+        "url": "https://raw.githubusercontent.com/Tamir-Zemach/Age-Of-War-Code-Project/refs/heads/main/Assets/Scripts/BackEnd/Utilities/NumberRisingUtil.cs"
+      }
+    ]
+  }
+]
